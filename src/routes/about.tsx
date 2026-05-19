@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Award, Heart, Sparkles, Layers } from "lucide-react";
-
+import { ai, seedFrom } from "@/lib/images";
+import { SafeImage } from "@/components/SafeImage";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
@@ -17,7 +18,7 @@ function AboutPage() {
   return (
     <>
       <section className="relative h-[400px]">
-        <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1920&q=80" className="absolute inset-0 w-full h-full object-cover" alt=""/>
+        <SafeImage src={ai("luxury modern showroom interior displaying premium tiles and bathroom fittings, elegant architecture, wide shot, photorealistic, 1920x1080", 1920, 1080, seedFrom("about-hero"))} className="absolute inset-0 w-full h-full object-cover" alt=""/>
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative container-x h-full flex flex-col items-center justify-center text-center text-white">
           <h1 className="font-display text-5xl md:text-6xl text-white">About Saha Traders</h1>
@@ -34,7 +35,7 @@ function AboutPage() {
             <p>Our team is here to help you find exactly what suits your home, your project, and your budget. Walk in for a coffee and a chat about your renovation — we're always happy to help.</p>
           </div>
         </div>
-        <img src="https://images.unsplash.com/photo-1600566753051-6057a8b4d8e1?auto=format&fit=crop&w=1200&q=80" className="rounded-lg shadow-xl w-full aspect-[4/5] object-cover" alt=""/>
+        <SafeImage src={ai("friendly professional store owner inside a premium tiles and sanitaryware showroom, high quality interior photography, 800x1000", 800, 1000, seedFrom("about-store"))} className="rounded-lg shadow-xl w-full aspect-[4/5] object-cover" alt="Our Showroom"/>
       </section>
 
       <section className="bg-slate-brand text-white py-16">
@@ -65,25 +66,6 @@ function AboutPage() {
               <v.I size={32} className="text-[var(--gold)] mx-auto mb-3"/>
               <h4 className="font-display text-lg text-slate-brand mb-1">{v.t}</h4>
               <p className="text-sm text-[var(--charcoal)]/80">{v.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="container-x pb-20">
-        <h2 className="section-title mb-12">Meet the Team</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { name: "Subir Saha", role: "Founder & Director", img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80" },
-            { name: "Anita Saha", role: "Showroom Manager", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80" },
-            { name: "Rohit Das", role: "Sales Consultant", img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80" },
-          ].map((m) => (
-            <div key={m.name} className="bg-white border border-subtle rounded-lg overflow-hidden text-center">
-              <img src={m.img} alt={m.name} className="w-full aspect-square object-cover"/>
-              <div className="p-5">
-                <h4 className="font-display text-xl text-slate-brand">{m.name}</h4>
-                <p className="text-[var(--gold)] text-xs uppercase tracking-widest mt-1">{m.role}</p>
-              </div>
             </div>
           ))}
         </div>
