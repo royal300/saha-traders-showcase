@@ -5,6 +5,7 @@ import { getProduct, getProductsByCategory, getCategory, inr } from "@/lib/produ
 import { ProductCard } from "@/components/ProductCard";
 import { useCart } from "@/lib/cart";
 import { useNavigate } from "@tanstack/react-router";
+import { SafeImage } from "@/components/SafeImage";
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
@@ -61,7 +62,7 @@ function ProductPage() {
         <div>
           <div className="bg-white rounded-lg border border-subtle overflow-hidden aspect-square relative">
             {p.gallery.map((g, i) => (
-              <img key={i} src={g} alt={p.name}
+              <SafeImage key={i} src={g} alt={`${p.name} — view ${i + 1}`} loading={i === 0 ? "eager" : "lazy"} decoding="async"
                 className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${i === img ? "opacity-100" : "opacity-0"}`}/>
             ))}
           </div>
@@ -69,7 +70,7 @@ function ProductPage() {
             {p.gallery.map((g, i) => (
               <button key={i} onClick={() => setImg(i)}
                 className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${i === img ? "border-[var(--gold)]" : "border-subtle hover:border-[var(--gold)]/50"}`}>
-                <img src={g} alt="" className="w-full h-full object-cover"/>
+                <SafeImage src={g} alt="" className="w-full h-full object-cover"/>
               </button>
             ))}
           </div>

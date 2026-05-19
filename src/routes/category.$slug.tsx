@@ -3,6 +3,7 @@ import * as React from "react";
 import { ChevronRight } from "lucide-react";
 import { getCategory, getProductsByCategory, categories } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
+import { SafeImage } from "@/components/SafeImage";
 
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => {
@@ -58,7 +59,7 @@ function CategoryPage() {
   return (
     <>
       <section className="relative h-[420px]">
-        <img src={c.banner} alt={c.name} className="absolute inset-0 w-full h-full object-cover"/>
+        <SafeImage src={c.banner} alt={c.name} loading="eager" decoding="async" className="absolute inset-0 w-full h-full object-cover"/>
         <div className="absolute inset-0 bg-black/55"/>
         <div className="relative container-x h-full flex flex-col items-center justify-center text-center text-white">
           <h1 className="font-display text-5xl md:text-6xl text-white">{c.name}</h1>

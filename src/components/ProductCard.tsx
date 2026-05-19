@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Star } from "lucide-react";
 import { type Product, inr } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import { SafeImage } from "@/components/SafeImage";
 
 export function ProductCard({ p }: { p: Product }) {
   const { add } = useCart();
@@ -9,7 +10,7 @@ export function ProductCard({ p }: { p: Product }) {
   return (
     <div className="card-product group flex flex-col">
       <Link to="/product/$slug" params={{ slug: p.slug }} className="block relative aspect-square overflow-hidden bg-[var(--offwhite)]">
-        <img
+        <SafeImage
           src={p.image}
           alt={p.name}
           loading="lazy"

@@ -2,36 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
-import { categories, getFeatured } from "@/lib/products";
+import { categories, getFeatured, showroomBanner } from "@/lib/products";
+import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
+import { SafeImage } from "@/components/SafeImage";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const slides = [
-  {
-    img: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1920&q=80",
-    label: "Floor & Wall Tiles",
-    heading: "Elegance Beneath Every Step",
-    sub: "Premium floor and wall tiles for homes, kitchens, and commercial spaces",
-    to: "/category/$slug", slug: "floor-tiles",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1920&q=80",
-    label: "Basins & Sinks",
-    heading: "Where Function Meets Beauty",
-    sub: "Designer basins and sinks that transform your bathroom experience",
-    to: "/category/$slug", slug: "basins",
-  },
-  {
-    img: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1920&q=80",
-    label: "Commodes & Fittings",
-    heading: "Redefine Your Bathroom Luxury",
-    sub: "Sleek, durable commodes and taps built for modern living",
-    to: "/category/$slug", slug: "commodes",
-  },
-];
+const slides = heroSlides.map((s) => ({
+  ...s,
+  to: "/category/$slug" as const,
+}));
 
 function Hero() {
   const [i, setI] = React.useState(0);
@@ -46,7 +29,7 @@ function Hero() {
           key={idx}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === idx ? "opacity-100" : "opacity-0"}`}
         >
-          <img src={s.img} alt={s.heading} className="w-full h-full object-cover" />
+          <SafeImage src={s.img} alt={s.heading} loading={idx === 0 ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/45" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="container-x text-center text-white animate-fade-up">
@@ -87,7 +70,7 @@ function CategorySection() {
               params={{ slug: c.slug }}
               className="group relative aspect-square overflow-hidden rounded-lg border border-subtle transition-all duration-300 hover:border-[var(--gold)] hover:scale-[1.03]"
             >
-              <img src={c.image} alt={c.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <SafeImage src={c.image} alt={c.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-5">
                 <h3 className="font-display text-white text-xl md:text-2xl">{c.name}</h3>
@@ -176,7 +159,7 @@ function Testimonials() {
 function CTABanner() {
   return (
     <section className="relative py-24">
-      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80" alt="Showroom" className="absolute inset-0 w-full h-full object-cover"/>
+      <SafeImage src={showroomBanner} alt="Saha Traders showroom" className="absolute inset-0 w-full h-full object-cover"/>
       <div className="absolute inset-0 bg-black/65" />
       <div className="relative container-x text-center text-white">
         <h2 className="font-display text-3xl md:text-5xl text-white">Ready to Transform Your Space?</h2>
