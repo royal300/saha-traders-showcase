@@ -30,3 +30,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local SSH utilities containing passwords
+ssh_run.js
+ssh_upload.js
+setup_vps_nginx.js

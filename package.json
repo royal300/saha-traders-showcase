@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "start": "vinxi start",
+    "start:node": "node start-node.js",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."
