@@ -3,12 +3,16 @@ import { Star } from "lucide-react";
 import { type Product, inr } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { SafeImage } from "@/components/SafeImage";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
-export function ProductCard({ p }: { p: Product }) {
+export function ProductCard({ p, idx = 0 }: { p: Product; idx?: number }) {
   const { add } = useCart();
   const off = p.oldPrice ? Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100) : 0;
+  const direction = idx % 2 === 0 ? "left" : "right";
+  const delay = (idx % 4) * 100;
   return (
-    <div className="card-product group flex flex-col">
+    <ScrollReveal direction={direction} delay={delay} className="flex flex-col h-full">
+      <div className="card-product group flex flex-col flex-1">
       <Link to="/product/$slug" params={{ slug: p.slug }} className="block relative aspect-square overflow-hidden bg-[var(--offwhite)]">
         <SafeImage
           src={p.image}
@@ -50,6 +54,7 @@ export function ProductCard({ p }: { p: Product }) {
           Add to Cart
         </button>
       </div>
-    </div>
+      </div>
+    </ScrollReveal>
   );
 }

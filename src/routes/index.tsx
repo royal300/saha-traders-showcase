@@ -6,6 +6,7 @@ import { categories, getFeatured, showroomBanner } from "@/lib/products";
 import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -63,10 +64,10 @@ function CategorySection() {
       <div className="container-x">
         <h2 className="section-title mb-12">Shop by Category</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {categories.map((c) => (
-            <Link
-              key={c.slug}
-              to="/category/$slug"
+          {categories.map((c, idx) => (
+            <ScrollReveal key={c.slug} direction={idx % 2 === 0 ? "left" : "right"} delay={(idx % 4) * 100}>
+              <Link
+                to="/category/$slug"
               params={{ slug: c.slug }}
               className="group relative aspect-square overflow-hidden rounded-2xl border border-[var(--gold)]/60 shadow-lg shadow-[var(--gold)]/10 transition-all duration-300 hover:border-[var(--gold)] hover:shadow-xl hover:shadow-[var(--gold)]/20 hover:-translate-y-1"
             >
@@ -78,7 +79,8 @@ function CategorySection() {
                   Explore <ChevronRight size={12}/>
                 </div>
               </div>
-            </Link>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </div>
@@ -93,7 +95,7 @@ function FeaturedSection() {
       <div className="container-x">
         <h2 className="section-title mb-12">Featured Products</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {featured.map((p) => <ProductCard key={p.slug} p={p} />)}
+          {featured.map((p, idx) => <ProductCard key={p.slug} p={p} idx={idx} />)}
         </div>
         <div className="text-center mt-12">
           <Link to="/category/$slug" params={{ slug: "floor-tiles" }} className="btn-gold">
