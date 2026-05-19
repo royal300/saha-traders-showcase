@@ -23,6 +23,7 @@ export function ai(
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${q}`;
 }
 
+import mainHeroBanner from "../banner.png";
 import imgBathroomTiles from "../Image/category/bathroom-tiles.jpg";
 import imgComodes from "../Image/category/comod.jpg";
 import imgSinks from "../Image/category/sink.jpg";
@@ -351,7 +352,7 @@ export const heroSlides = [
     label: "Floor & Wall Tiles",
     heading: "Elegance Beneath Every Step",
     sub: "Premium floor and wall tiles for homes, kitchens, and commercial spaces",
-    img: categoryVisuals["floor-tiles"].banner,
+    img: mainHeroBanner,
   },
   {
     slug: "basins",
