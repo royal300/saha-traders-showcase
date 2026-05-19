@@ -43,6 +43,30 @@ import kitchen2 from "../Image/Products/kitchen/2.jpg";
 import kitchen3 from "../Image/Products/kitchen/3.webp";
 import kitchen4 from "../Image/Products/kitchen/4.jpg";
 
+import bathroomTile1 from "../Image/Products/bathroom/12x18-fish-page-0019-500x500.webp";
+import bathroomTile2 from "../Image/Products/bathroom/250x375-designer-bathroom-wall-tiles-2219405794-2w7kxklt.avif";
+import bathroomTile3 from "../Image/Products/bathroom/designer-bathroom-wall-tiles.jpg";
+import bathroomTile4 from "../Image/Products/bathroom/onyx-blue-1_1_.webp";
+
+import basin1 from "../Image/Products/basin/37-50-9-8-wash-basin-20-x-14-x-6-inches-over-counter-basin-for-original-imahah5zdn5yaduf.webp";
+import basin2 from "../Image/Products/basin/71RWIrwUk8L._AC_UF1000,1000_QL80_.jpg";
+import basin3 from "../Image/Products/basin/81QQL_8mmGL.webp";
+import basin4 from "../Image/Products/basin/9122310SW.webp";
+
+import commode1 from "../Image/Products/comod/01_4bfe4baf-7f1c-405d-855b-fa63731e8b01.webp";
+import commode2 from "../Image/Products/comod/61TsgFj3OkL.jpg";
+import commode3 from "../Image/Products/comod/68-51-4-aps-745-plantex-75-original-imahm8r2ppctze8d.webp";
+import commode4 from "../Image/Products/comod/images (11).jpg";
+
+import tap1 from "../Image/Products/tap/61gUuFAlXmL._SL1000.jpg";
+import tap2 from "../Image/Products/tap/images (10).jpg";
+import tap3 from "../Image/Products/tap/images (9).jpg";
+import tap4 from "../Image/Products/tap/wall-mount-installation-type-for-sink-wash-basin-taps-2-in-1-enriched-0-original-imahcgmuvzqb6gws.webp";
+
+import sink1 from "../Image/Products/sink/114b4f59-6995-4b1f-a797-bd57bd997853.webp";
+import sink2 from "../Image/Products/sink/images (6).jpg";
+import sink3 from "../Image/Products/sink/images (7).jpg";
+import sink4 from "../Image/Products/sink/images (8).jpg";
 
 export const categoryVisuals: Record<string, { thumb: string; banner: string }> = {
   "floor-tiles": {
@@ -282,6 +306,41 @@ generatedCatalog["kitchen-tiles"] = [
   { name: "Kitchen Backsplash 2", image: kitchen2, gallery: [kitchen2, kitchen3, kitchen4, kitchen1] },
   { name: "Kitchen Backsplash 3", image: kitchen3, gallery: [kitchen3, kitchen4, kitchen1, kitchen2] },
   { name: "Kitchen Backsplash 4", image: kitchen4, gallery: [kitchen4, kitchen1, kitchen2, kitchen3] },
+];
+
+generatedCatalog["bathroom-tiles"] = [
+  { name: "Designer Bathroom Tile 1", image: bathroomTile1, gallery: [bathroomTile1, bathroomTile2, bathroomTile3, bathroomTile4] },
+  { name: "Designer Bathroom Tile 2", image: bathroomTile2, gallery: [bathroomTile2, bathroomTile3, bathroomTile4, bathroomTile1] },
+  { name: "Designer Bathroom Tile 3", image: bathroomTile3, gallery: [bathroomTile3, bathroomTile4, bathroomTile1, bathroomTile2] },
+  { name: "Designer Bathroom Tile 4", image: bathroomTile4, gallery: [bathroomTile4, bathroomTile1, bathroomTile2, bathroomTile3] },
+];
+
+generatedCatalog["basins"] = [
+  { name: "Premium Wash Basin 1", image: basin1, gallery: [basin1, basin2, basin3, basin4] },
+  { name: "Premium Wash Basin 2", image: basin2, gallery: [basin2, basin3, basin4, basin1] },
+  { name: "Premium Wash Basin 3", image: basin3, gallery: [basin3, basin4, basin1, basin2] },
+  { name: "Premium Wash Basin 4", image: basin4, gallery: [basin4, basin1, basin2, basin3] },
+];
+
+generatedCatalog["commodes"] = [
+  { name: "Luxury Commode 1", image: commode1, gallery: [commode1, commode2, commode3, commode4] },
+  { name: "Luxury Commode 2", image: commode2, gallery: [commode2, commode3, commode4, commode1] },
+  { name: "Luxury Commode 3", image: commode3, gallery: [commode3, commode4, commode1, commode2] },
+  { name: "Luxury Commode 4", image: commode4, gallery: [commode4, commode1, commode2, commode3] },
+];
+
+generatedCatalog["taps"] = [
+  { name: "Modern Faucet Tap 1", image: tap1, gallery: [tap1, tap2, tap3, tap4] },
+  { name: "Modern Faucet Tap 2", image: tap2, gallery: [tap2, tap3, tap4, tap1] },
+  { name: "Modern Faucet Tap 3", image: tap3, gallery: [tap3, tap4, tap1, tap2] },
+  { name: "Modern Faucet Tap 4", image: tap4, gallery: [tap4, tap1, tap2, tap3] },
+];
+
+generatedCatalog["sinks"] = [
+  { name: "Stainless Steel Sink 1", image: sink1, gallery: [sink1, sink2, sink3, sink4] },
+  { name: "Stainless Steel Sink 2", image: sink2, gallery: [sink2, sink3, sink4, sink1] },
+  { name: "Stainless Steel Sink 3", image: sink3, gallery: [sink3, sink4, sink1, sink2] },
+  { name: "Stainless Steel Sink 4", image: sink4, gallery: [sink4, sink1, sink2, sink3] },
 ];
 
 export const catalogSeeds = generatedCatalog;
