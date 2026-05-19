@@ -23,7 +23,7 @@ function Hero() {
     return () => clearInterval(t);
   }, []);
   return (
-    <section className="relative h-[100vh] min-h-[600px] w-full overflow-hidden">
+    <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
       {slides.map((s, idx) => (
         <div
           key={idx}
@@ -68,7 +68,7 @@ function CategorySection() {
               key={c.slug}
               to="/category/$slug"
               params={{ slug: c.slug }}
-              className="group relative aspect-square overflow-hidden rounded-lg border border-subtle transition-all duration-300 hover:border-[var(--gold)] hover:scale-[1.03]"
+              className="group relative aspect-square overflow-hidden rounded-2xl border border-[var(--gold)]/60 shadow-lg shadow-[var(--gold)]/10 transition-all duration-300 hover:border-[var(--gold)] hover:shadow-xl hover:shadow-[var(--gold)]/20 hover:-translate-y-1"
             >
               <SafeImage src={c.image} alt={c.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
@@ -114,12 +114,12 @@ function WhyUs() {
   ];
   return (
     <section className="bg-slate-brand text-white py-16">
-      <div className="container-x grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
+      <div className="container-x grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 md:divide-x divide-white/10">
         {items.map((I) => (
-          <div key={I.title} className="px-6 py-6 md:py-0 text-center">
+          <div key={I.title} className="px-2 md:px-6 text-center">
             <I.icon size={36} className="text-[var(--gold)] mx-auto mb-3" />
-            <h4 className="font-display text-lg text-white mb-1">{I.title}</h4>
-            <p className="text-sm text-white/70">{I.text}</p>
+            <h4 className="font-display text-base md:text-lg text-white mb-1">{I.title}</h4>
+            <p className="text-xs md:text-sm text-white/70 leading-snug">{I.text}</p>
           </div>
         ))}
       </div>
@@ -137,9 +137,9 @@ function Testimonials() {
     <section className="py-20">
       <div className="container-x">
         <h2 className="section-title mb-12">What Our Customers Say</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-6 pb-4 -mx-4 px-4 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
           {list.map((t) => (
-            <div key={t.name} className="bg-white border border-subtle rounded-lg p-7 shadow-sm">
+            <div key={t.name} className="min-w-[85vw] md:min-w-0 snap-center bg-white border border-subtle rounded-xl p-7 shadow-sm">
               <Quote className="text-[var(--gold)] mb-3" size={28}/>
               <p className="text-[var(--charcoal)] leading-relaxed text-sm">{t.text}</p>
               <div className="flex items-center gap-0.5 mt-4">
@@ -158,7 +158,7 @@ function Testimonials() {
 
 function CTABanner() {
   return (
-    <section className="relative py-24">
+    <section className="relative py-24 mb-0 flex flex-col justify-end">
       <SafeImage src={showroomBanner} alt="Saha Traders showroom" className="absolute inset-0 w-full h-full object-cover"/>
       <div className="absolute inset-0 bg-black/65" />
       <div className="relative container-x text-center text-white">

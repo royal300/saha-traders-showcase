@@ -4,7 +4,7 @@ import { categories } from "@/lib/products";
 
 export function Footer() {
   return (
-    <footer className="bg-slate-brand text-white/80 mt-20">
+    <footer className="bg-slate-brand text-white/80 mt-0">
       <div className="container-x py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         <div>
           <h3 className="font-display text-2xl text-white mb-3">
