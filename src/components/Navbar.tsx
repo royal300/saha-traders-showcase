@@ -97,7 +97,7 @@ export function Navbar() {
       {mobile && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobile(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-[80%] max-w-sm bg-slate-brand p-6 overflow-y-auto animate-slide-in-right" style={{ animationName: "slideInLeft" }}>
+          <div className="absolute left-0 top-0 bottom-0 w-[80%] max-w-sm bg-slate-brand p-6 overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
               <span className="font-display text-xl text-white">Menu</span>
               <button onClick={() => setMobile(false)} className="text-white"><X size={22}/></button>
