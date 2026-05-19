@@ -1,26 +1,204 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
+import * as React from "react";
+import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
+import { categories, getFeatured } from "@/lib/products";
+import { ProductCard } from "@/components/ProductCard";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
+const slides = [
+  {
+    img: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1920&q=80",
+    label: "Floor & Wall Tiles",
+    heading: "Elegance Beneath Every Step",
+    sub: "Premium floor and wall tiles for homes, kitchens, and commercial spaces",
+    to: "/category/$slug", slug: "floor-tiles",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1620626011761-996317b8d101?auto=format&fit=crop&w=1920&q=80",
+    label: "Basins & Sinks",
+    heading: "Where Function Meets Beauty",
+    sub: "Designer basins and sinks that transform your bathroom experience",
+    to: "/category/$slug", slug: "basins",
+  },
+  {
+    img: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?auto=format&fit=crop&w=1920&q=80",
+    label: "Commodes & Fittings",
+    heading: "Redefine Your Bathroom Luxury",
+    sub: "Sleek, durable commodes and taps built for modern living",
+    to: "/category/$slug", slug: "commodes",
+  },
+];
+
+function Hero() {
+  const [i, setI] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % slides.length), 4500);
+    return () => clearInterval(t);
+  }, []);
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <section className="relative h-[100vh] min-h-[600px] w-full overflow-hidden">
+      {slides.map((s, idx) => (
+        <div
+          key={idx}
+          className={`absolute inset-0 transition-opacity duration-1000 ${i === idx ? "opacity-100" : "opacity-0"}`}
+        >
+          <img src={s.img} alt={s.heading} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="container-x text-center text-white animate-fade-up">
+              <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-xs md:text-sm mb-4">{s.label}</div>
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>
+              <p className="mt-5 text-white/85 max-w-2xl mx-auto text-base md:text-lg">{s.sub}</p>
+              <Link to={s.to} params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
+                Explore Collection <ChevronRight size={16}/>
+              </Link>
+            </div>
+          </div>
+        </div>
+      ))}
+      <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-10">
+        {slides.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setI(idx)}
+            className={`h-2 rounded-full transition-all ${i === idx ? "w-8 bg-[var(--gold)]" : "w-2 bg-white/60"}`}
+            aria-label={`Slide ${idx + 1}`}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CategorySection() {
+  return (
+    <section className="py-20">
+      <div className="container-x">
+        <h2 className="section-title mb-12">Shop by Category</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {categories.map((c) => (
+            <Link
+              key={c.slug}
+              to="/category/$slug"
+              params={{ slug: c.slug }}
+              className="group relative aspect-square overflow-hidden rounded-lg border border-subtle transition-all duration-300 hover:border-[var(--gold)] hover:scale-[1.03]"
+            >
+              <img src={c.image} alt={c.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <h3 className="font-display text-white text-xl md:text-2xl">{c.name}</h3>
+                <div className="text-[var(--gold)] text-xs uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-1">
+                  Explore <ChevronRight size={12}/>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FeaturedSection() {
+  const featured = getFeatured();
+  return (
+    <section className="py-20 bg-white">
+      <div className="container-x">
+        <h2 className="section-title mb-12">Featured Products</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          {featured.map((p) => <ProductCard key={p.slug} p={p} />)}
+        </div>
+        <div className="text-center mt-12">
+          <Link to="/category/$slug" params={{ slug: "floor-tiles" }} className="btn-gold">
+            View All Products <ChevronRight size={16}/>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function WhyUs() {
+  const items = [
+    { icon: Award, title: "Premium Quality", text: "Sourced from top manufacturers" },
+    { icon: Truck, title: "Fast Delivery", text: "Serving Barasat and surrounding areas" },
+    { icon: MessageSquare, title: "Expert Guidance", text: "Our team helps you find the perfect fit" },
+    { icon: RotateCcw, title: "Easy Returns", text: "Hassle-free return policy" },
+  ];
+  return (
+    <section className="bg-slate-brand text-white py-16">
+      <div className="container-x grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-white/10">
+        {items.map((I) => (
+          <div key={I.title} className="px-6 py-6 md:py-0 text-center">
+            <I.icon size={36} className="text-[var(--gold)] mx-auto mb-3" />
+            <h4 className="font-display text-lg text-white mb-1">{I.title}</h4>
+            <p className="text-sm text-white/70">{I.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Testimonials() {
+  const list = [
+    { name: "Rajesh Sharma", text: "Saha Traders helped us pick the perfect floor tiles for our new home. Quality and service both top-notch.", rating: 5 },
+    { name: "Priya Banerjee", text: "Beautiful basin and tap collection. The team was knowledgeable and delivery was prompt to my Barasat address.", rating: 5 },
+    { name: "Amit Das", text: "Renovated our entire bathroom with their products. Workmanship is excellent and pricing is fair.", rating: 5 },
+  ];
+  return (
+    <section className="py-20">
+      <div className="container-x">
+        <h2 className="section-title mb-12">What Our Customers Say</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {list.map((t) => (
+            <div key={t.name} className="bg-white border border-subtle rounded-lg p-7 shadow-sm">
+              <Quote className="text-[var(--gold)] mb-3" size={28}/>
+              <p className="text-[var(--charcoal)] leading-relaxed text-sm">{t.text}</p>
+              <div className="flex items-center gap-0.5 mt-4">
+                {Array.from({length: t.rating}).map((_, i) => (
+                  <Star key={i} size={14} className="fill-[var(--gold)] text-[var(--gold)]" />
+                ))}
+              </div>
+              <div className="font-display text-slate-brand mt-3">{t.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CTABanner() {
+  return (
+    <section className="relative py-24">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=80" alt="Showroom" className="absolute inset-0 w-full h-full object-cover"/>
+      <div className="absolute inset-0 bg-black/65" />
+      <div className="relative container-x text-center text-white">
+        <h2 className="font-display text-3xl md:text-5xl text-white">Ready to Transform Your Space?</h2>
+        <p className="mt-4 text-white/80 max-w-xl mx-auto">Visit our showroom in Barasat or browse our full catalogue online.</p>
+        <div className="mt-8 flex flex-wrap gap-4 justify-center">
+          <Link to="/category/$slug" params={{ slug: "floor-tiles" }} className="btn-gold">Browse Products</Link>
+          <Link to="/contact" className="btn-outline-white">Contact Us</Link>
+        </div>
+      </div>
+    </section>
   );
 }
 
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <>
+      <Hero />
+      <CategorySection />
+      <FeaturedSection />
+      <WhyUs />
+      <Testimonials />
+      <CTABanner />
+    </>
+  );
 }
