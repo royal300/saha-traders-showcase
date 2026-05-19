@@ -65,11 +65,11 @@ function CategorySection() {
         <h2 className="section-title mb-12">Shop by Category</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
           {categories.map((c, idx) => (
-            <ScrollReveal key={c.slug} direction={idx % 2 === 0 ? "left" : "right"} delay={(idx % 4) * 100}>
+            <ScrollReveal key={c.slug} direction={idx % 2 === 0 ? "left" : "right"} delay={(idx % 4) * 100} className="h-full">
               <Link
                 to="/category/$slug"
               params={{ slug: c.slug }}
-              className="group relative aspect-square overflow-hidden rounded-2xl border border-[var(--gold)]/60 shadow-lg shadow-[var(--gold)]/10 transition-all duration-300 hover:border-[var(--gold)] hover:shadow-xl hover:shadow-[var(--gold)]/20 hover:-translate-y-1"
+              className="block w-full h-full group relative aspect-square overflow-hidden rounded-2xl border border-[var(--gold)]/60 shadow-lg shadow-[var(--gold)]/10 transition-all duration-300 hover:border-[var(--gold)] hover:shadow-xl hover:shadow-[var(--gold)]/20 hover:-translate-y-1"
             >
               <SafeImage src={c.image} alt={c.name} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
