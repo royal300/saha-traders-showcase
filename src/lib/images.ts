@@ -37,7 +37,7 @@ export const categoryVisuals: Record<string, { thumb: string; banner: string }> 
     banner: ai("spacious luxury kitchen with beautiful ceramic tiled backsplash, marble countertops, bright modern interior, 1600x600", 1600, 600, seedFrom("cat-banner-kitchen-tiles")),
   },
   "bathroom-tiles": {
-    thumb: ai("premium spa bathroom wall and floor tiles, aqua blue and white marble samples, 800x800", 800, 800, seedFrom("cat-thumb-bathroom-tiles")),
+    thumb: ai("luxury bathroom interior, glowing circular LED mirror on dark grey stone wall, wooden tile accents, white freestanding bathtub, moody lighting, photorealistic, 800x800", 800, 800, seedFrom("cat-thumb-bathroom-tiles-v2")),
     banner: ai("luxury spa bathroom interior with elegant ceramic floor and wall tiles installed, high-end fixtures, 1600x600", 1600, 600, seedFrom("cat-banner-bathroom-tiles")),
   },
   basins: {
@@ -45,15 +45,15 @@ export const categoryVisuals: Record<string, { thumb: string; banner: string }> 
     banner: ai("luxury bathroom vanity counter with premium white ceramic wash basin, elegant faucet tap, mirror, warm lighting, 1600x600", 1600, 600, seedFrom("cat-banner-basins")),
   },
   commodes: {
-    thumb: ai("sleek white ceramic toilet commodes, one-piece and wall-hung toilet models, sanitaryware product display, 800x800", 800, 800, seedFrom("cat-thumb-commodes")),
+    thumb: ai("modern white ceramic one-piece toilet commode, open lid, placed on light wooden floor, dark black marble wall background, photorealistic, 800x800", 800, 800, seedFrom("cat-thumb-commodes-v2")),
     banner: ai("clean contemporary bathroom interior with a premium white ceramic toilet commode installed, minimalist design, 1600x600", 1600, 600, seedFrom("cat-banner-commodes")),
   },
   taps: {
-    thumb: ai("premium chrome bathroom taps faucets mixer collection, polished brass and steel, studio lighting packshot, 800x800", 800, 800, seedFrom("cat-thumb-taps")),
+    thumb: ai("silver chrome wall mounted water tap faucet, simple minimalist straight handle design, isolated on pure white background, professional product photography, 800x800", 800, 800, seedFrom("cat-thumb-taps-v2")),
     banner: ai("modern luxury bathroom sink vanity with an elegant polished chrome tap faucet close-up, water drop, photorealistic, 1600x600", 1600, 600, seedFrom("cat-banner-taps")),
   },
   sinks: {
-    thumb: ai("stainless steel single and double bowl kitchen sinks, composite granite sink display, showroom packshot, 800x800", 800, 800, seedFrom("cat-thumb-sinks")),
+    thumb: ai("premium stainless steel kitchen sink, single bowl with drainboard, clean modern design, isolated on pure white background, professional product shot, 800x800", 800, 800, seedFrom("cat-thumb-sinks-v2")),
     banner: ai("beautiful modern kitchen design with stainless steel sink, designer faucet tap, clean marble countertop, 1600x600", 1600, 600, seedFrom("cat-banner-sinks")),
   },
 };
