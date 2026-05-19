@@ -28,6 +28,22 @@ import imgComodes from "../Image/category/comod.jpg";
 import imgSinks from "../Image/category/sink.jpg";
 import imgTaps from "../Image/category/taps.jpg";
 
+import floor1 from "../Image/Products/floor/1 (2).webp";
+import floor2 from "../Image/Products/floor/2.jpg";
+import floor3 from "../Image/Products/floor/3.webp";
+import floor4 from "../Image/Products/floor/4.jpg";
+
+import wall1 from "../Image/Products/wall/50.jpg";
+import wall2 from "../Image/Products/wall/51.jpg";
+import wall3 from "../Image/Products/wall/52.jpg";
+import wall4 from "../Image/Products/wall/53.jpg";
+
+import kitchen1 from "../Image/Products/kitchen/1.jpg";
+import kitchen2 from "../Image/Products/kitchen/2.jpg";
+import kitchen3 from "../Image/Products/kitchen/3.webp";
+import kitchen4 from "../Image/Products/kitchen/4.jpg";
+
+
 export const categoryVisuals: Record<string, { thumb: string; banner: string }> = {
   "floor-tiles": {
     thumb: ai("premium vitrified floor tiles samples, marble granite wood pattern slabs, studio product display, 800x800", 800, 800, seedFrom("cat-thumb-floor-tiles")),
@@ -245,7 +261,30 @@ function buildCatalog() {
   return catalog;
 }
 
-export const catalogSeeds = buildCatalog();
+const generatedCatalog = buildCatalog();
+
+generatedCatalog["floor-tiles"] = [
+  { name: "Premium Floor Tile 1", image: floor1, gallery: [floor1, floor2, floor3, floor4] },
+  { name: "Premium Floor Tile 2", image: floor2, gallery: [floor2, floor3, floor4, floor1] },
+  { name: "Premium Floor Tile 3", image: floor3, gallery: [floor3, floor4, floor1, floor2] },
+  { name: "Premium Floor Tile 4", image: floor4, gallery: [floor4, floor1, floor2, floor3] },
+];
+
+generatedCatalog["wall-tiles"] = [
+  { name: "Designer Wall Tile 1", image: wall1, gallery: [wall1, wall2, wall3, wall4] },
+  { name: "Designer Wall Tile 2", image: wall2, gallery: [wall2, wall3, wall4, wall1] },
+  { name: "Designer Wall Tile 3", image: wall3, gallery: [wall3, wall4, wall1, wall2] },
+  { name: "Designer Wall Tile 4", image: wall4, gallery: [wall4, wall1, wall2, wall3] },
+];
+
+generatedCatalog["kitchen-tiles"] = [
+  { name: "Kitchen Backsplash 1", image: kitchen1, gallery: [kitchen1, kitchen2, kitchen3, kitchen4] },
+  { name: "Kitchen Backsplash 2", image: kitchen2, gallery: [kitchen2, kitchen3, kitchen4, kitchen1] },
+  { name: "Kitchen Backsplash 3", image: kitchen3, gallery: [kitchen3, kitchen4, kitchen1, kitchen2] },
+  { name: "Kitchen Backsplash 4", image: kitchen4, gallery: [kitchen4, kitchen1, kitchen2, kitchen3] },
+];
+
+export const catalogSeeds = generatedCatalog;
 
 export const heroSlides = [
   {
