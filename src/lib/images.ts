@@ -28,10 +28,10 @@ import imgComodes from "../Image/category/comod.jpg";
 import imgSinks from "../Image/category/sink.jpg";
 import imgTaps from "../Image/category/taps.jpg";
 
-import floor1 from "../Image/Products/floor/1 (2).webp";
-import floor2 from "../Image/Products/floor/2.jpg";
-import floor3 from "../Image/Products/floor/3.webp";
-import floor4 from "../Image/Products/floor/4.jpg";
+import floor1 from "../Image/Products/floor/4-1230-230-spc-floor-tiles-for-floors-interlocking-flooring-original-imah4kygh6w2m3uz.webp";
+import floor2 from "../Image/Products/floor/bathroom-floor-tiles-3.webp";
+import floor3 from "../Image/Products/floor/images (12).jpg";
+import floor4 from "../Image/Products/floor/orient_bell_-_super_gloss_portoro_gold_marble_1.jpg";
 
 import wall1 from "../Image/Products/wall/50.jpg";
 import wall2 from "../Image/Products/wall/51.jpg";
