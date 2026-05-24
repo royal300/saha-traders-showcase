@@ -1,15 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Facebook, MessageCircle, MapPin, Phone, Mail } from "lucide-react";
 import { categories } from "@/lib/products";
+import logoPng from "@/logo.png";
 
 export function Footer() {
   return (
     <footer className="bg-slate-brand text-white/80 mt-0">
       <div className="container-x py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         <div>
-          <h3 className="font-display text-2xl text-white mb-3">
-            Saha <span className="text-[var(--gold)]">Traders</span>
-          </h3>
+          <div className="flex items-center gap-3 mb-4">
+            <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-14 w-auto object-contain shrink-0" />
+            <h3 className="font-display text-xl text-white leading-tight">
+              Saha <span className="text-[var(--gold)]">Marble & Tiles</span>
+            </h3>
+          </div>
           <p className="text-[var(--gold)] italic text-sm mb-3">Crafting Spaces, Defining Excellence</p>
           <p className="text-sm leading-relaxed">
             Barasat's most trusted name for premium tiles and bathroom fittings. Quality you can build on.
@@ -52,7 +56,7 @@ export function Footer() {
       </div>
       <div className="border-t border-white/10">
         <div className="container-x py-5 text-xs text-white/60 text-center">
-          © 2025 Saha Traders. All Rights Reserved. | Barasat, West Bengal
+          © 2025 Saha Marble & Tiles. All Rights Reserved. | Barasat, West Bengal
         </div>
       </div>
     </footer>

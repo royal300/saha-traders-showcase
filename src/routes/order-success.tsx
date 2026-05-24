@@ -3,7 +3,7 @@ import * as React from "react";
 import { inr } from "@/lib/products";
 
 export const Route = createFileRoute("/order-success")({
-  head: () => ({ meta: [{ title: "Order Placed — Saha Traders" }] }),
+  head: () => ({ meta: [{ title: "Order Placed — Saha Marble & Tiles" }] }),
   component: SuccessPage,
 });
 

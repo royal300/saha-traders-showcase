@@ -8,11 +8,11 @@ import { SafeImage } from "@/components/SafeImage";
 export const Route = createFileRoute("/category/$slug")({
   head: ({ params }) => {
     const c = getCategory(params.slug);
-    const title = c ? `${c.name} — Saha Traders` : "Category — Saha Traders";
+    const title = c ? `${c.name} — Saha Marble & Tiles` : "Category — Saha Marble & Tiles";
     return {
       meta: [
         { title },
-        { name: "description", content: c?.blurb ?? "Browse our catalogue at Saha Traders." },
+        { name: "description", content: c?.blurb ?? "Browse our catalogue at Saha Marble & Tiles." },
         { property: "og:title", content: title },
         { property: "og:description", content: c?.blurb ?? "" },
         ...(c?.banner ? [{ property: "og:image", content: c.banner }] : []),

@@ -109,7 +109,7 @@ const make = (
       reviews: 12 + i * 7,
       image: seed.image,
       gallery: seed.gallery,
-      description: `${seed.name} from Saha Traders — crafted for durability, designed for elegance. Sourced from premium manufacturers and finished to perfection for long-lasting beauty in your space.`,
+      description: `${seed.name} from Saha Marble & Tiles — crafted for durability, designed for elegance. Sourced from premium manufacturers and finished to perfection for long-lasting beauty in your space.`,
       specs: specsByCategory[category] ?? [],
     };
   });

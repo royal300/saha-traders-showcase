@@ -243,4 +243,15 @@
     animation: drawCheck 0.9s ease-out forwards;
   }
   .check-tick { animation-delay: 0.5s; }
+
+  @keyframes attractShake {
+    0%, 100% { transform: scale(1); }
+    2%, 6%, 10% { transform: scale(1.025) rotate(-1.5deg); }
+    4%, 8% { transform: scale(1.025) rotate(1.5deg); }
+    12% { transform: scale(1) rotate(0deg); }
+    20% { transform: scale(1); }
+  }
+  .animate-attract-shake {
+    animation: attractShake 4s ease-in-out infinite;
+  }
 }

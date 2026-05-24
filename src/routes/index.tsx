@@ -115,13 +115,13 @@ function WhyUs() {
     { icon: RotateCcw, title: "Easy Returns", text: "Hassle-free return policy" },
   ];
   return (
-    <section className="bg-slate-brand text-white py-16">
-      <div className="container-x grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 md:divide-x divide-white/10">
+    <section className="bg-slate-brand text-white py-10 md:py-14">
+      <div className="container-x grid grid-cols-2 lg:grid-cols-4 gap-y-7 gap-x-4 md:divide-x divide-white/10">
         {items.map((I) => (
-          <div key={I.title} className="px-2 md:px-6 text-center">
-            <I.icon size={36} className="text-[var(--gold)] mx-auto mb-3" />
-            <h4 className="font-display text-base md:text-lg text-white mb-1">{I.title}</h4>
-            <p className="text-xs md:text-sm text-white/70 leading-snug">{I.text}</p>
+          <div key={I.title} className="px-1 md:px-5 text-center">
+            <I.icon size={26} className="text-[var(--gold)] mx-auto mb-2" />
+            <h4 className="font-display text-sm md:text-base text-white mb-1">{I.title}</h4>
+            <p className="text-[11px] md:text-xs text-white/70 leading-snug">{I.text}</p>
           </div>
         ))}
       </div>
@@ -131,7 +131,7 @@ function WhyUs() {
 
 function Testimonials() {
   const list = [
-    { name: "Rajesh Sharma", text: "Saha Traders helped us pick the perfect floor tiles for our new home. Quality and service both top-notch.", rating: 5 },
+    { name: "Rajesh Sharma", text: "Saha Marble & Tiles helped us pick the perfect floor tiles for our new home. Quality and service both top-notch.", rating: 5 },
     { name: "Priya Banerjee", text: "Beautiful basin and tap collection. The team was knowledgeable and delivery was prompt to my Barasat address.", rating: 5 },
     { name: "Amit Das", text: "Renovated our entire bathroom with their products. Workmanship is excellent and pricing is fair.", rating: 5 },
   ];
@@ -161,7 +161,7 @@ function Testimonials() {
 function CTABanner() {
   return (
     <section className="relative py-24 mb-0 flex flex-col justify-end">
-      <SafeImage src={showroomBanner} alt="Saha Traders showroom" className="absolute inset-0 w-full h-full object-cover"/>
+      <SafeImage src={showroomBanner} alt="Saha Marble & Tiles showroom" className="absolute inset-0 w-full h-full object-cover"/>
       <div className="absolute inset-0 bg-black/65" />
       <div className="relative container-x text-center text-white">
         <h2 className="font-display text-3xl md:text-5xl text-white">Ready to Transform Your Space?</h2>
@@ -180,8 +180,8 @@ function Index() {
     <>
       <Hero />
       <CategorySection />
-      <FeaturedSection />
       <WhyUs />
+      <FeaturedSection />
       <Testimonials />
       <CTABanner />
     </>

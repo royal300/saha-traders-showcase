@@ -5,7 +5,7 @@ import { useCart } from "@/lib/cart";
 import { inr } from "@/lib/products";
 
 export const Route = createFileRoute("/checkout")({
-  head: () => ({ meta: [{ title: "Checkout — Saha Traders" }, { name: "description", content: "Complete your order at Saha Traders." }] }),
+  head: () => ({ meta: [{ title: "Checkout — Saha Marble & Tiles" }, { name: "description", content: "Complete your order at Saha Marble & Tiles." }] }),
   component: CheckoutPage,
 });
 
@@ -13,8 +13,7 @@ function CheckoutPage() {
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
-  const [pay, setPay] = React.useState("cod");
-  const [form, setForm] = React.useState({ name: "", mobile: "", email: "", address: "", city: "Barasat", pin: "", landmark: "" });
+  const [form, setForm] = React.useState({ name: "", mobile: "", address: "" });
   const delivery = subtotal >= 5000 || subtotal === 0 ? 0 : 200;
   const total = subtotal + delivery;
 
@@ -24,9 +23,33 @@ function CheckoutPage() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (items.length === 0) return;
-    const order = { items, total, form, pay, at: new Date().toISOString() };
+
+    // Build structured WhatsApp message
+    const itemsList = items.map((i, idx) => (
+      `${idx + 1}. *${i.name}* (Qty: ${i.qty})\n` +
+      `   Price: ${inr(i.price)} each | Total: ${inr(i.price * i.qty)}`
+    )).join("\n\n");
+
+    const message = 
+      `🛍️ *New Order from Saha Marble & Tiles*\n` +
+      `----------------------------------------\n` +
+      `👤 *Name:* ${form.name}\n` +
+      `📞 *Mobile:* ${form.mobile}\n` +
+      `📍 *Address:* ${form.address}\n` +
+      `----------------------------------------\n` +
+      `📋 *Items I want to purchase:* \n\n` +
+      `${itemsList}\n\n` +
+      `----------------------------------------\n` +
+      `💰 *Grand Total:* ${inr(total)}`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/919330833711?text=${encodedMessage}`;
+
+    const order = { items, total, form, pay: "WhatsApp", at: new Date().toISOString() };
     try { localStorage.setItem("saha_last_order", JSON.stringify(order)); } catch {}
+    
     clear();
+    window.open(whatsappUrl, "_blank");
     navigate({ to: "/order-success" });
   };
 
@@ -73,32 +96,16 @@ function CheckoutPage() {
 
       <form onSubmit={submit} className="bg-white border border-subtle rounded-lg p-7 space-y-4">
         <h2 className="font-display text-xl text-slate-brand mb-2">Delivery Details</h2>
-        <Field label="Full Name *"><input required value={form.name} onChange={set("name")} className="ipt"/></Field>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="Mobile Number *"><input required value={form.mobile} onChange={set("mobile")} className="ipt"/></Field>
-          <Field label="Email Address"><input type="email" value={form.email} onChange={set("email")} className="ipt"/></Field>
-        </div>
-        <Field label="Delivery Address *"><textarea required rows={3} value={form.address} onChange={set("address")} className="ipt"/></Field>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Field label="City *"><input required value={form.city} onChange={set("city")} className="ipt"/></Field>
-          <Field label="PIN Code *"><input required value={form.pin} onChange={set("pin")} className="ipt"/></Field>
-        </div>
-        <Field label="Landmark"><input value={form.landmark} onChange={set("landmark")} className="ipt"/></Field>
+        <Field label="Full Name *"><input required value={form.name} onChange={set("name")} className="ipt" placeholder="Enter your full name"/></Field>
+        <Field label="Mobile Number *"><input required value={form.mobile} onChange={set("mobile")} className="ipt" placeholder="Enter 10-digit mobile number"/></Field>
+        <Field label="Delivery Address *"><textarea required rows={4} value={form.address} onChange={set("address")} className="ipt" placeholder="Enter short delivery address"/></Field>
 
-        <div className="pt-3 border-t border-subtle">
-          <h2 className="font-display text-xl text-slate-brand mb-3">Payment Method</h2>
-          <label className="flex items-center gap-3 p-4 border border-subtle rounded-md cursor-pointer hover:border-[var(--gold)]">
-            <input type="radio" name="pay" checked={pay === "cod"} onChange={() => setPay("cod")} className="accent-[var(--gold)]"/>
-            <span className="text-sm font-medium">Cash on Delivery</span>
-          </label>
-          <label className="flex items-center gap-3 p-4 border border-subtle rounded-md cursor-pointer hover:border-[var(--gold)] mt-2">
-            <input type="radio" name="pay" checked={pay === "bank"} onChange={() => setPay("bank")} className="accent-[var(--gold)]"/>
-            <span className="text-sm font-medium">Bank Transfer</span>
-          </label>
-          <p className="text-xs text-[var(--charcoal)]/60 mt-2">Online payment coming soon.</p>
-        </div>
-
-        <button className="btn-gold w-full !py-3.5 text-base">Place Order</button>
+        <button type="submit" className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white flex items-center justify-center gap-2.5 py-4 px-6 rounded-lg text-base font-bold shadow-lg shadow-green-500/20 cursor-pointer transition-colors mt-6 uppercase tracking-wider">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" className="shrink-0 animate-bounce">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.504-5.714-1.465L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.963C16.388 2.016 13.91 1.01 11.999 1.01c-5.435 0-9.861 4.371-9.865 9.802-.001 1.84.498 3.631 1.444 5.218L2.539 21.05l4.108-1.896zm12.355-6.223c-.302-.151-1.789-.882-2.057-.981-.268-.099-.463-.148-.658.151-.195.298-.754.981-.925 1.18-.17.198-.341.222-.643.072-1.054-.528-1.824-.875-2.584-2.18-.198-.342.198-.318.567-1.054.061-.121.03-.227-.015-.318-.046-.091-.463-1.12-.634-1.533-.166-.406-.333-.351-.463-.357-.12-.006-.258-.007-.396-.007-.138 0-.363.052-.553.259-.19.206-.728.712-.728 1.738 0 1.026.744 2.016.848 2.152.104.135 1.464 2.235 3.548 3.136.495.215.882.343 1.185.439.497.158.951.135 1.309.082.399-.058 1.789-.731 2.042-1.439.253-.708.253-1.314.177-1.439-.077-.124-.277-.197-.579-.348z" />
+          </svg>
+          Order via WhatsApp
+        </button>
       </form>
 
       <style>{`

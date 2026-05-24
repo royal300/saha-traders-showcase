@@ -10,11 +10,11 @@ import { SafeImage } from "@/components/SafeImage";
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
     const p = getProduct(params.slug);
-    const title = p ? `${p.name} — Saha Traders` : "Product — Saha Traders";
+    const title = p ? `${p.name} — Saha Marble & Tiles` : "Product — Saha Marble & Tiles";
     return {
       meta: [
         { title },
-        { name: "description", content: p?.description ?? "Premium tiles & bathroom fittings at Saha Traders." },
+        { name: "description", content: p?.description ?? "Premium tiles & bathroom fittings at Saha Marble & Tiles." },
         { property: "og:title", content: title },
         { property: "og:description", content: p?.description ?? "" },
         ...(p?.image ? [{ property: "og:image", content: p.image }] : []),
@@ -44,9 +44,28 @@ function ProductPage() {
   const [qty, setQty] = React.useState(1);
   const [acc, setAcc] = React.useState<string | null>("specs");
   const { add } = useCart();
-  const navigate = useNavigate();
 
-  const buyNow = () => { add(p, qty); navigate({ to: "/checkout" }); };
+  const addToCartRef = React.useRef<HTMLButtonElement>(null);
+  const [showFloatingButton, setShowFloatingButton] = React.useState(false);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowFloatingButton(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (addToCartRef.current) {
+      observer.observe(addToCartRef.current);
+    }
+
+    return () => {
+      if (addToCartRef.current) {
+        observer.unobserve(addToCartRef.current);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -82,28 +101,28 @@ function ProductPage() {
             <div className="flex items-center gap-0.5">
               {Array.from({length:5}).map((_,i)=>(<Star key={i} size={14} className="fill-[var(--gold)] text-[var(--gold)]"/>))}
             </div>
-            <span className="text-sm text-[var(--charcoal)]/70">({p.reviews} reviews)</span>
           </div>
           <div className="flex items-baseline gap-3 mt-5">
             <span className="text-[var(--gold)] font-bold text-3xl">{inr(p.price)}</span>
             {p.oldPrice && <span className="text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</span>}
           </div>
-          <p className="text-[var(--charcoal)] mt-5 leading-relaxed">{p.description}</p>
 
-          <div className="flex items-center gap-3 mt-7">
-            <div className="flex items-center border border-subtle rounded-md overflow-hidden">
-              <button onClick={() => setQty(q => Math.max(1, q-1))} className="w-10 h-11 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Minus size={14} className="mx-auto"/></button>
-              <span className="w-12 text-center font-semibold">{qty}</span>
-              <button onClick={() => setQty(q => q+1)} className="w-10 h-11 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Plus size={14} className="mx-auto"/></button>
+          <div className="flex items-center gap-4 mt-7">
+            <span className="text-sm font-semibold uppercase tracking-wider text-[var(--charcoal)]/80">Quantity:</span>
+            <div className="flex items-center border border-subtle rounded-md overflow-hidden bg-white">
+              <button onClick={() => setQty(q => Math.max(1, q-1))} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Minus size={12} className="mx-auto"/></button>
+              <span className="w-12 text-center font-semibold text-sm">{qty}</span>
+              <button onClick={() => setQty(q => q+1)} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Plus size={12} className="mx-auto"/></button>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 mt-5">
-            <button onClick={() => add(p, qty)} className="btn-gold flex-1 min-w-[200px]">
-              <ShoppingBag size={16}/> Add to Cart
-            </button>
-            <button onClick={buyNow} className="btn-slate flex-1 min-w-[200px] !bg-transparent !text-[var(--slate)] hover:!bg-[var(--slate)] hover:!text-[var(--gold)]">
-              Buy Now
+          <div className="mt-6">
+            <button
+              onClick={() => add(p, qty)}
+              className="btn-gold w-full animate-attract-shake flex items-center justify-center gap-2.5 !py-4 text-base font-bold shadow-lg shadow-[var(--gold)]/10 border-2 border-[var(--gold)] hover:border-slate-brand"
+              ref={addToCartRef}
+            >
+              <ShoppingBag size={20}/> Add to Cart
             </button>
           </div>
 
@@ -146,12 +165,38 @@ function ProductPage() {
       </section>
 
       {related.length > 0 && (
-        <section className="container-x pb-20">
+        <section className="container-x pb-20 text-slate-brand">
           <h2 className="section-title mb-10">You May Also Like</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
             {related.map(r => <ProductCard key={r.slug} p={r} />)}
           </div>
         </section>
+      )}
+
+      {showFloatingButton && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-subtle py-3.5 px-4 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] animate-fade-up">
+          <div className="container-x flex items-center justify-between gap-4">
+            <div className="hidden sm:flex items-center gap-3">
+              <img src={p.image} alt="" className="w-11 h-11 object-cover rounded border border-subtle shrink-0" />
+              <div className="text-left">
+                <div className="font-display font-semibold text-slate-brand text-sm line-clamp-1">{p.name}</div>
+                <div className="text-xs text-[var(--charcoal)]/60">{cat.name}</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 flex-1 sm:flex-none justify-between sm:justify-end w-full sm:w-auto">
+              <div className="text-left sm:text-right shrink-0">
+                <div className="text-[var(--gold)] font-bold text-lg leading-tight">{inr(p.price)}</div>
+                {p.oldPrice && <div className="text-xs text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</div>}
+              </div>
+              <button
+                onClick={() => add(p, qty)}
+                className="btn-gold animate-attract-shake flex items-center justify-center gap-2 !py-3 !px-6 text-sm font-bold shadow-md shadow-[var(--gold)]/10"
+              >
+                <ShoppingBag size={15}/> Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

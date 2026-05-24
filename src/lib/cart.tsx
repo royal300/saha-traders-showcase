@@ -47,7 +47,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (ex) return prev.map((i) => i.slug === p.slug ? { ...i, qty: i.qty + qty } : i);
       return [...prev, { slug: p.slug, name: p.name, price: p.price, image: p.image, qty }];
     });
-    setOpen(true);
   };
   const remove: CartCtx["remove"] = (slug) =>
     setItems((prev) => prev.filter((i) => i.slug !== slug));

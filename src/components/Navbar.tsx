@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
 import { categories } from "@/lib/products";
 import { useCart } from "@/lib/cart";
+import logoPng from "@/logo.png";
 
 export function Navbar() {
   const [mobile, setMobile] = React.useState(false);
@@ -26,15 +27,10 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-slate-brand shadow-md">
       <div className="container-x flex items-center justify-between h-20">
-        <Link to="/" className="flex items-center gap-2 text-white">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" className="text-[var(--gold)]">
-            <rect x="2" y="2" width="9" height="9" rx="1" fill="currentColor" opacity="0.9"/>
-            <rect x="13" y="2" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-            <rect x="2" y="13" width="9" height="9" rx="1" stroke="currentColor" strokeWidth="1.5"/>
-            <rect x="13" y="13" width="9" height="9" rx="1" fill="currentColor" opacity="0.9"/>
-          </svg>
-          <span className="font-display text-2xl tracking-wide">
-            Saha <span className="text-[var(--gold)]">Traders</span>
+        <Link to="/" className="flex items-center gap-2.5 text-white">
+          <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-10 w-auto object-contain shrink-0" />
+          <span className="font-display text-lg md:text-2xl tracking-wide whitespace-nowrap">
+            Saha <span className="text-[var(--gold)]">Marble & Tiles</span>
           </span>
         </Link>
 

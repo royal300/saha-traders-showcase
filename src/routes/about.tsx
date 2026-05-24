@@ -5,9 +5,9 @@ import { SafeImage } from "@/components/SafeImage";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Saha Traders, Barasat" },
-      { name: "description", content: "Learn about Saha Traders — Barasat's trusted name in premium tiles and bathroom fittings for over a decade." },
-      { property: "og:title", content: "About Saha Traders" },
+      { title: "About — Saha Marble & Tiles, Barasat" },
+      { name: "description", content: "Learn about Saha Marble & Tiles — Barasat's trusted name in premium tiles and bathroom fittings for over a decade." },
+      { property: "og:title", content: "About Saha Marble & Tiles" },
       { property: "og:description", content: "10+ years serving Barasat with premium tiles and bathroom fittings." },
     ],
   }),
@@ -21,7 +21,7 @@ function AboutPage() {
         <SafeImage src={ai("luxury modern showroom interior displaying premium tiles and bathroom fittings, elegant architecture, wide shot, photorealistic, 1920x1080", 1920, 1080, seedFrom("about-hero"))} className="absolute inset-0 w-full h-full object-cover" alt=""/>
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative container-x h-full flex flex-col items-center justify-center text-center text-white">
-          <h1 className="font-display text-5xl md:text-6xl text-white">About Saha Traders</h1>
+          <h1 className="font-display text-5xl md:text-6xl text-white">About Saha Marble & Tiles</h1>
           <p className="text-[var(--gold)] mt-3 uppercase tracking-[0.3em] text-xs">Crafting Spaces, Defining Excellence</p>
         </div>
       </section>
@@ -30,7 +30,7 @@ function AboutPage() {
         <div>
           <h2 className="font-display text-3xl md:text-4xl text-slate-brand mb-5">Barasat's trusted name for tiles and bathroom fittings.</h2>
           <div className="space-y-4 text-[var(--charcoal)] leading-relaxed">
-            <p>For over a decade, Saha Traders has been the destination of choice for homeowners, architects, and contractors across Barasat and beyond. What began as a small tile shop has grown into a premium showroom carrying a curated catalogue of floor and wall tiles, basins, commodes, taps and sinks.</p>
+            <p>For over a decade, Saha Marble & Tiles has been the destination of choice for homeowners, architects, and contractors across Barasat and beyond. What began as a small tile shop has grown into a premium showroom carrying a curated catalogue of floor and wall tiles, basins, commodes, taps and sinks.</p>
             <p>Every product we stock is hand-picked from leading manufacturers — chosen for durability, beauty, and long-term value. We don't believe in shortcuts; we believe in spaces that stand the test of time.</p>
             <p>Our team is here to help you find exactly what suits your home, your project, and your budget. Walk in for a coffee and a chat about your renovation — we're always happy to help.</p>
           </div>
