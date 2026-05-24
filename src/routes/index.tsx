@@ -197,29 +197,61 @@ function CTABanner() {
 
 function TrustedDealers() {
   const list = [jaguarLogo, kajariaLogo, rudLogo, sochLogo];
-  // Duplicate multiple times for a continuous, seamless looping row
   const marqueeItems = [...list, ...list, ...list, ...list, ...list, ...list];
 
   return (
-    <section className="py-20 bg-slate-50/70 border-y border-subtle overflow-hidden">
-      <div className="container-x">
-        <h2 className="section-title mb-14 text-center">
-          Trusted Brand Partners
-        </h2>
-        <div className="relative w-full overflow-hidden mask-gradient">
-          <div className="flex gap-16 md:gap-28 items-center w-max animate-marquee whitespace-nowrap">
-            {marqueeItems.map((logo, idx) => (
-              <img
-                key={idx}
-                src={logo}
-                alt="Brand logo"
-                className="h-14 md:h-20 w-auto object-contain opacity-95 hover:opacity-100 hover:scale-105 transition-all duration-300 shrink-0"
-              />
-            ))}
+    <div className="relative">
+      {/* Top wavy divider */}
+      <div className="relative w-full overflow-hidden leading-none" style={{ height: '60px' }}>
+        <svg
+          viewBox="0 0 1440 60"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute bottom-0 w-full h-full"
+        >
+          <path
+            d="M0,30 C180,60 360,0 540,30 C720,60 900,0 1080,30 C1260,60 1380,15 1440,30 L1440,60 L0,60 Z"
+            fill="#f8fafc"
+          />
+        </svg>
+      </div>
+
+      {/* Section content */}
+      <section className="py-16 bg-slate-50/80 overflow-hidden">
+        <div className="container-x">
+          <h2 className="section-title mb-14 text-center">
+            Trusted Brand Partners
+          </h2>
+          <div className="relative w-full overflow-hidden mask-gradient">
+            <div className="flex gap-16 md:gap-28 items-center w-max animate-marquee whitespace-nowrap">
+              {marqueeItems.map((logo, idx) => (
+                <img
+                  key={idx}
+                  src={logo}
+                  alt="Brand logo"
+                  className="h-14 md:h-20 w-auto object-contain opacity-95 hover:opacity-100 hover:scale-105 transition-all duration-300 shrink-0"
+                />
+              ))}
+            </div>
           </div>
         </div>
+      </section>
+
+      {/* Bottom wavy divider */}
+      <div className="relative w-full overflow-hidden leading-none" style={{ height: '60px' }}>
+        <svg
+          viewBox="0 0 1440 60"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="absolute top-0 w-full h-full"
+        >
+          <path
+            d="M0,30 C180,0 360,60 540,30 C720,0 900,60 1080,30 C1260,0 1380,45 1440,30 L1440,0 L0,0 Z"
+            fill="#f8fafc"
+          />
+        </svg>
       </div>
-    </section>
+    </div>
   );
 }
 
