@@ -43,17 +43,52 @@ function ProductPage() {
   const [img, setImg] = React.useState(0);
   const [qty, setLocalQty] = React.useState(1);
   const [acc, setAcc] = React.useState<string | null>("specs");
-  const { items, add, setQty, remove } = useCart();
+  const { items, add, setQty, remove, setIsProductBarActive } = useCart();
 
   const cartItem = items.find(i => i.slug === p.slug);
 
   const addToCartRef = React.useRef<HTMLButtonElement>(null);
   const [showFloatingButton, setShowFloatingButton] = React.useState(false);
 
+  // Reset states and scroll to top instantly when changing products
   React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+    setShowFloatingButton(false);
+    setImg(0);
+    setLocalQty(1);
+  }, [slug]);
+
+  // Sync floating button active state to global cart bar stacking
+  React.useEffect(() => {
+    setIsProductBarActive(showFloatingButton);
+  }, [showFloatingButton, setIsProductBarActive]);
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => setIsProductBarActive(false);
+  }, [setIsProductBarActive]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      // Force hide if we are near the top of the page (below 200px scrolled)
+      if (window.scrollY < 200) {
+        setShowFloatingButton(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setShowFloatingButton(!entry.isIntersecting);
+        if (entry.isIntersecting) {
+          setShowFloatingButton(false);
+        } else {
+          // Only show if user scrolled down a bit to prevent flash or false triggers on transition
+          if (window.scrollY > 200) {
+            setShowFloatingButton(true);
+          } else {
+            setShowFloatingButton(false);
+          }
+        }
       },
       { threshold: 0 }
     );
@@ -63,11 +98,12 @@ function ProductPage() {
     }
 
     return () => {
+      window.removeEventListener("scroll", handleScroll);
       if (addToCartRef.current) {
         observer.unobserve(addToCartRef.current);
       }
     };
-  }, []);
+  }, [slug]);
 
   return (
     <>
@@ -96,7 +132,7 @@ function ProductPage() {
                   <SafeImage
                     src={g}
                     alt=""
-                    className={`w-full h-full object-cover transition-all duration-300 ${active ? "filter-none opacity-100" : "filter blur-[1.5px] opacity-50 hover:blur-none hover:opacity-100"}`}
+                    className={`w-full h-full object-cover transition-all duration-300 ${active ? "filter-none opacity-100" : "filter blur-[0.6px] opacity-80 hover:blur-none hover:opacity-100"}`}
                   />
                 </button>
               );

@@ -19,6 +19,8 @@ type CartCtx = {
   subtotal: number;
   open: boolean;
   setOpen: (v: boolean) => void;
+  isProductBarActive: boolean;
+  setIsProductBarActive: (v: boolean) => void;
 };
 
 const Ctx = React.createContext<CartCtx | null>(null);
@@ -28,6 +30,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = React.useState<CartItem[]>([]);
   const [open, setOpen] = React.useState(false);
   const [hydrated, setHydrated] = React.useState(false);
+  const [isProductBarActive, setIsProductBarActive] = React.useState(false);
 
   React.useEffect(() => {
     try {
@@ -51,14 +54,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const remove: CartCtx["remove"] = (slug) =>
     setItems((prev) => prev.filter((i) => i.slug !== slug));
   const setQty: CartCtx["setQty"] = (slug, qty) =>
-    setItems((prev) => prev.map((i) => i.slug === slug ? { ...i, qty: Math.max(1, qty) } : i));
+    setItems((prev) => {
+      if (qty <= 0) return prev.filter((i) => i.slug !== slug);
+      return prev.map((i) => i.slug === slug ? { ...i, qty } : i);
+    });
   const clear = () => setItems([]);
 
   const count = items.reduce((a, i) => a + i.qty, 0);
   const subtotal = items.reduce((a, i) => a + i.qty * i.price, 0);
 
   return (
-    <Ctx.Provider value={{ items, add, remove, setQty, clear, count, subtotal, open, setOpen }}>
+    <Ctx.Provider value={{ items, add, remove, setQty, clear, count, subtotal, open, setOpen, isProductBarActive, setIsProductBarActive }}>
       {children}
     </Ctx.Provider>
   );

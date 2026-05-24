@@ -31,7 +31,7 @@ export function CartDrawer() {
                     <div className="font-display text-sm text-slate-brand line-clamp-2">{i.name}</div>
                     <div className="text-[var(--gold)] font-semibold text-sm mt-1">{inr(i.price)}</div>
                     <div className="flex items-center gap-2 mt-2">
-                      <button onClick={() => setQty(i.slug, i.qty - 1)} className="w-7 h-7 border border-subtle rounded flex items-center justify-center hover:border-[var(--gold)]"><Minus size={12}/></button>
+                      <button onClick={() => i.qty === 1 ? remove(i.slug) : setQty(i.slug, i.qty - 1)} className="w-7 h-7 border border-subtle rounded flex items-center justify-center hover:border-[var(--gold)]"><Minus size={12}/></button>
                       <span className="text-sm w-6 text-center">{i.qty}</span>
                       <button onClick={() => setQty(i.slug, i.qty + 1)} className="w-7 h-7 border border-subtle rounded flex items-center justify-center hover:border-[var(--gold)]"><Plus size={12}/></button>
                       <button onClick={() => remove(i.slug)} className="ml-auto text-[var(--charcoal)]/50 hover:text-red-500"><Trash2 size={14}/></button>

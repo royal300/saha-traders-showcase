@@ -5,7 +5,7 @@ import { useCart } from "@/lib/cart";
 import { inr } from "@/lib/products";
 
 export function FloatingCartBar() {
-  const { count, subtotal } = useCart();
+  const { count, subtotal, isProductBarActive } = useCart();
   const [pulse, setPulse] = React.useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -25,18 +25,25 @@ export function FloatingCartBar() {
     return null;
   }
 
-  // If on a product page, offset it vertically to sit cleanly above the floating product bar
-  const isProductPage = pathname.startsWith("/product/");
-  const positionClass = isProductPage ? "bottom-24 md:bottom-28" : "bottom-6";
+  // If the product bottom action drawer is active, stack above it, otherwise sit at the absolute bottom
+  const positionClass = isProductBarActive
+    ? "bottom-[82px] px-4 justify-center"
+    : "bottom-0 px-0 justify-center";
+
+  const containerClass = isProductBarActive
+    ? "w-full max-w-xl rounded-full border border-[var(--gold)]/50 shadow-2xl py-3.5 px-6"
+    : "w-full max-w-none rounded-none border-t border-[var(--gold)]/30 shadow-[0_-8px_30px_rgba(0,0,0,0.2)] py-4 px-6 md:px-12";
 
   return (
-    <div className={`fixed ${positionClass} left-0 right-0 z-40 px-4 pointer-events-none flex justify-center transition-all duration-300`}>
+    <div className={`fixed ${positionClass} left-0 right-0 z-40 pointer-events-none flex transition-all duration-500`}>
       <div
-        className={`w-full max-w-xl pointer-events-auto bg-slate-brand text-white border border-[var(--gold)]/50 rounded-full px-6 py-3.5 shadow-2xl flex items-center justify-between transition-all duration-500 transform ${
-          pulse ? "scale-105 shadow-[var(--gold)]/20" : "scale-100"
+        className={`pointer-events-auto bg-slate-brand text-white flex items-center justify-between transition-all duration-500 transform ${containerClass} ${
+          pulse ? "scale-103 shadow-[var(--gold)]/20" : "scale-100"
         } animate-fade-up`}
         style={{
-          boxShadow: "0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(201, 168, 76, 0.2)"
+          boxShadow: isProductBarActive 
+            ? "0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 15px -3px rgba(201, 168, 76, 0.2)"
+            : "0 -8px 30px rgba(0, 0, 0, 0.15)"
         }}
       >
         <div className="flex items-center gap-3.5">
