@@ -28,8 +28,8 @@ export function Navbar() {
     <header className="sticky top-0 z-50 bg-slate-brand shadow-md">
       <div className="container-x flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2.5 text-white">
-          <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-10 w-auto object-contain shrink-0" />
-          <span className="font-display text-lg md:text-2xl tracking-wide whitespace-nowrap">
+          <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-12 md:h-14 w-auto object-contain shrink-0 transition-all" />
+          <span className="font-display text-xl md:text-3xl tracking-wide whitespace-nowrap transition-all">
             Saha <span className="text-[var(--gold)]">Marble & Tiles</span>
           </span>
         </Link>

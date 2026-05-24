@@ -7,6 +7,10 @@ import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import jaguarLogo from "@/jaguar.png";
+import kajariaLogo from "@/kajaria.jpg";
+import rudLogo from "@/rud.jpg";
+import sochLogo from "@/soch.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -175,6 +179,34 @@ function CTABanner() {
   );
 }
 
+function TrustedDealers() {
+  const list = [jaguarLogo, kajariaLogo, rudLogo, sochLogo];
+  // Duplicate multiple times for a continuous, seamless looping row
+  const marqueeItems = [...list, ...list, ...list, ...list, ...list, ...list];
+
+  return (
+    <section className="py-8 bg-white border-y border-subtle overflow-hidden">
+      <div className="container-x">
+        <h3 className="text-center font-display text-base md:text-lg text-[var(--charcoal)]/70 uppercase tracking-[0.25em] mb-6">
+          Trusted Dealer Of
+        </h3>
+        <div className="relative w-full overflow-hidden mask-gradient">
+          <div className="flex gap-12 md:gap-20 items-center w-max animate-marquee whitespace-nowrap">
+            {marqueeItems.map((logo, idx) => (
+              <img
+                key={idx}
+                src={logo}
+                alt="Brand logo"
+                className="h-8 md:h-11 w-auto object-contain grayscale hover:grayscale-0 opacity-55 hover:opacity-100 transition-all duration-300 shrink-0"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Index() {
   return (
     <>
@@ -182,6 +214,7 @@ function Index() {
       <CategorySection />
       <WhyUs />
       <FeaturedSection />
+      <TrustedDealers />
       <Testimonials />
       <CTABanner />
     </>

@@ -1,12 +1,13 @@
 import * as React from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { inr } from "@/lib/products";
 
 export function FloatingCartBar() {
-  const { count, subtotal, items } = useCart();
+  const { count, subtotal } = useCart();
   const [pulse, setPulse] = React.useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   // Trigger pulse animation when count changes
   React.useEffect(() => {
@@ -19,10 +20,19 @@ export function FloatingCartBar() {
 
   if (count === 0) return null;
 
+  // Don't show the cart bar on Checkout or Success pages
+  if (pathname === "/checkout" || pathname === "/order-success") {
+    return null;
+  }
+
+  // If on a product page, offset it vertically to sit cleanly above the floating product bar
+  const isProductPage = pathname.startsWith("/product/");
+  const positionClass = isProductPage ? "bottom-24 md:bottom-28" : "bottom-6";
+
   return (
-    <div className="fixed bottom-6 left-0 right-0 z-40 px-4 pointer-events-none flex justify-center">
+    <div className={`fixed ${positionClass} left-0 right-0 z-40 px-4 pointer-events-none flex justify-center transition-all duration-300`}>
       <div
-        className={`w-full max-w-xl pointer-events-auto bg-slate-brand/90 backdrop-blur-md text-white border border-[var(--gold)]/50 rounded-full px-6 py-3.5 shadow-2xl flex items-center justify-between transition-all duration-500 transform ${
+        className={`w-full max-w-xl pointer-events-auto bg-slate-brand text-white border border-[var(--gold)]/50 rounded-full px-6 py-3.5 shadow-2xl flex items-center justify-between transition-all duration-500 transform ${
           pulse ? "scale-105 shadow-[var(--gold)]/20" : "scale-100"
         } animate-fade-up`}
         style={{

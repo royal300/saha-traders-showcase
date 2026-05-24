@@ -39,7 +39,6 @@ export function ProductCard({ p, idx = 0 }: { p: Product; idx?: number }) {
           {Array.from({ length: 5 }).map((_, i) => (
             <Star key={i} size={12} className="fill-[var(--gold)] text-[var(--gold)]" />
           ))}
-          <span className="text-[11px] text-[var(--charcoal)]/60 ml-1">({p.reviews})</span>
         </div>
         <div className="flex items-baseline gap-2">
           <span className="text-[var(--gold)] font-semibold text-lg">{inr(p.price)}</span>

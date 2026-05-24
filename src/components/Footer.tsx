@@ -8,9 +8,9 @@ export function Footer() {
     <footer className="bg-slate-brand text-white/80 mt-0">
       <div className="container-x py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
         <div>
-          <div className="flex items-center gap-3 mb-4">
-            <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-14 w-auto object-contain shrink-0" />
-            <h3 className="font-display text-xl text-white leading-tight">
+          <div className="flex items-center gap-3.5 mb-4">
+            <img src={logoPng} alt="Saha Marble & Tiles Logo" className="h-16 md:h-20 w-auto object-contain shrink-0 transition-all" />
+            <h3 className="font-display text-2xl md:text-3xl text-white leading-tight transition-all">
               Saha <span className="text-[var(--gold)]">Marble & Tiles</span>
             </h3>
           </div>

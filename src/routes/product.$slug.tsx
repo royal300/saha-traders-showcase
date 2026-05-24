@@ -41,9 +41,11 @@ function ProductPage() {
   const cat = getCategory(p.category)!;
   const related = getProductsByCategory(p.category).filter(x => x.slug !== p.slug).slice(0, 4);
   const [img, setImg] = React.useState(0);
-  const [qty, setQty] = React.useState(1);
+  const [qty, setLocalQty] = React.useState(1);
   const [acc, setAcc] = React.useState<string | null>("specs");
-  const { add } = useCart();
+  const { items, add, setQty, remove } = useCart();
+
+  const cartItem = items.find(i => i.slug === p.slug);
 
   const addToCartRef = React.useRef<HTMLButtonElement>(null);
   const [showFloatingButton, setShowFloatingButton] = React.useState(false);
@@ -86,12 +88,19 @@ function ProductPage() {
             ))}
           </div>
           <div className="grid grid-cols-4 gap-3 mt-4">
-            {p.gallery.map((g, i) => (
-              <button key={i} onClick={() => setImg(i)}
-                className={`aspect-square rounded-md overflow-hidden border-2 transition-all ${i === img ? "border-[var(--gold)]" : "border-subtle hover:border-[var(--gold)]/50"}`}>
-                <SafeImage src={g} alt="" className="w-full h-full object-cover"/>
-              </button>
-            ))}
+            {p.gallery.map((g, i) => {
+              const active = i === img;
+              return (
+                <button key={i} onClick={() => setImg(i)}
+                  className={`aspect-square rounded-md overflow-hidden border-2 transition-all duration-300 ${active ? "border-[var(--gold)] scale-100" : "border-subtle hover:border-[var(--gold)]/50 hover:scale-[0.98]"}`}>
+                  <SafeImage
+                    src={g}
+                    alt=""
+                    className={`w-full h-full object-cover transition-all duration-300 ${active ? "filter-none opacity-100" : "filter blur-[1.5px] opacity-50 hover:blur-none hover:opacity-100"}`}
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -107,24 +116,40 @@ function ProductPage() {
             {p.oldPrice && <span className="text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</span>}
           </div>
 
-          <div className="flex items-center gap-4 mt-7">
-            <span className="text-sm font-semibold uppercase tracking-wider text-[var(--charcoal)]/80">Quantity:</span>
-            <div className="flex items-center border border-subtle rounded-md overflow-hidden bg-white">
-              <button onClick={() => setQty(q => Math.max(1, q-1))} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Minus size={12} className="mx-auto"/></button>
-              <span className="w-12 text-center font-semibold text-sm">{qty}</span>
-              <button onClick={() => setQty(q => q+1)} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Plus size={12} className="mx-auto"/></button>
+          {cartItem ? (
+            <div className="mt-6 bg-[var(--gold)]/10 border border-[var(--gold)] rounded-lg p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-fade-up">
+              <div>
+                <div className="text-xs text-[var(--charcoal)]/60 font-semibold uppercase tracking-wider">Already in Cart</div>
+                <div className="text-slate-brand font-display font-bold text-lg mt-0.5">{cartItem.qty} {cartItem.qty === 1 ? "Unit" : "Units"} Added</div>
+              </div>
+              <div className="flex items-center border border-slate-brand rounded-md overflow-hidden bg-white shadow-sm self-start sm:self-auto">
+                <button onClick={() => cartItem.qty === 1 ? remove(p.slug) : setQty(p.slug, cartItem.qty - 1)} className="w-12 h-12 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors flex items-center justify-center font-bold" aria-label="Decrease quantity"><Minus size={16}/></button>
+                <span className="w-16 text-center font-bold text-slate-brand text-lg">{cartItem.qty}</span>
+                <button onClick={() => setQty(p.slug, cartItem.qty + 1)} className="w-12 h-12 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors flex items-center justify-center font-bold" aria-label="Increase quantity"><Plus size={16}/></button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-4 mt-7">
+                <span className="text-sm font-semibold uppercase tracking-wider text-[var(--charcoal)]/80">Quantity:</span>
+                <div className="flex items-center border border-subtle rounded-md overflow-hidden bg-white">
+                  <button onClick={() => setLocalQty(q => Math.max(1, q-1))} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Minus size={12} className="mx-auto"/></button>
+                  <span className="w-12 text-center font-semibold text-sm">{qty}</span>
+                  <button onClick={() => setLocalQty(q => q+1)} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors"><Plus size={12} className="mx-auto"/></button>
+                </div>
+              </div>
 
-          <div className="mt-6">
-            <button
-              onClick={() => add(p, qty)}
-              className="btn-gold w-full animate-attract-shake flex items-center justify-center gap-2.5 !py-4 text-base font-bold shadow-lg shadow-[var(--gold)]/10 border-2 border-[var(--gold)] hover:border-slate-brand"
-              ref={addToCartRef}
-            >
-              <ShoppingBag size={20}/> Add to Cart
-            </button>
-          </div>
+              <div className="mt-6">
+                <button
+                  onClick={() => add(p, qty)}
+                  className="btn-gold w-full animate-attract-shake flex items-center justify-center gap-2.5 !py-4 text-base font-bold shadow-lg shadow-[var(--gold)]/10 border-2 border-[var(--gold)] hover:border-slate-brand"
+                  ref={addToCartRef}
+                >
+                  <ShoppingBag size={20}/> Add to Cart
+                </button>
+              </div>
+            </>
+          )}
 
           <ul className="mt-7 space-y-2 text-sm text-[var(--charcoal)]">
             {["Premium Quality Certified","Available in bulk orders","Free delivery on orders above ₹5000","Easy return within 7 days"].map((t)=>(
@@ -188,12 +213,20 @@ function ProductPage() {
                 <div className="text-[var(--gold)] font-bold text-lg leading-tight">{inr(p.price)}</div>
                 {p.oldPrice && <div className="text-xs text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</div>}
               </div>
-              <button
-                onClick={() => add(p, qty)}
-                className="btn-gold animate-attract-shake flex items-center justify-center gap-2 !py-3 !px-6 text-sm font-bold shadow-md shadow-[var(--gold)]/10"
-              >
-                <ShoppingBag size={15}/> Add to Cart
-              </button>
+              {cartItem ? (
+                <div className="flex items-center border border-slate-brand rounded-full overflow-hidden bg-slate-brand shrink-0 shadow-md">
+                  <button onClick={() => cartItem.qty === 1 ? remove(p.slug) : setQty(p.slug, cartItem.qty - 1)} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors flex items-center justify-center font-bold" aria-label="Decrease quantity"><Minus size={14}/></button>
+                  <span className="w-12 text-center font-bold text-white text-sm">{cartItem.qty}</span>
+                  <button onClick={() => setQty(p.slug, cartItem.qty + 1)} className="w-10 h-10 bg-slate-brand text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--slate)] transition-colors flex items-center justify-center font-bold" aria-label="Increase quantity"><Plus size={14}/></button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => add(p, qty)}
+                  className="btn-gold animate-attract-shake flex items-center justify-center gap-2.5 !py-3.5 !px-8 text-base font-bold shadow-lg shadow-[var(--gold)]/20"
+                >
+                  <ShoppingBag size={18}/> Add to Cart
+                </button>
+              )}
             </div>
           </div>
         </div>
