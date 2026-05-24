@@ -14,6 +14,8 @@ import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/lib/cart";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingCartBar } from "@/components/FloatingCartBar";
+import { trackVisitorFn } from "@/lib/server-functions";
+import { hydrateCatalog } from "@/lib/products";
 
 function NotFoundComponent() {
   return (
@@ -118,6 +120,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  React.useEffect(() => {
+    // Hydrate catalog from database
+    hydrateCatalog().catch(err => console.error("Error hydrating catalog:", err));
+    // Log unique visitor IP securely
+    trackVisitorFn().catch(err => console.error("Error tracking visitor:", err));
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

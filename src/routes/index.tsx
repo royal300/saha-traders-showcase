@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
-import { categories, getFeatured, showroomBanner } from "@/lib/products";
+import { categories, getFeatured, showroomBanner, dynamicBanners } from "@/lib/products";
 import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
@@ -16,20 +16,33 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const slides = heroSlides.map((s) => ({
-  ...s,
-  to: "/category/$slug" as const,
-}));
-
 function Hero() {
+  const activeSlides = React.useMemo(() => {
+    if (dynamicBanners && dynamicBanners.length > 0) {
+      return dynamicBanners.map(s => ({
+        slug: s.slug || "",
+        label: s.label || "",
+        heading: s.heading || "",
+        sub: s.sub || "",
+        img: s.image,
+        to: "/category/$slug" as const
+      }));
+    }
+    return heroSlides.map((s) => ({
+      ...s,
+      to: "/category/$slug" as const,
+    }));
+  }, []);
+
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % slides.length), 4500);
+    const t = setInterval(() => setI((v) => (v + 1) % activeSlides.length), 4500);
     return () => clearInterval(t);
-  }, []);
+  }, [activeSlides]);
+
   return (
     <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
-      {slides.map((s, idx) => (
+      {activeSlides.map((s, idx) => (
         <div
           key={idx}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === idx ? "opacity-100" : "opacity-0"}`}
@@ -38,9 +51,9 @@ function Hero() {
           <div className="absolute inset-0 bg-black/45" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="container-x text-center text-white animate-fade-up">
-              <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-xs md:text-sm mb-4">{s.label}</div>
-              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>
-              <p className="mt-5 text-white/85 max-w-2xl mx-auto text-base md:text-lg">{s.sub}</p>
+              {s.label && <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-xs md:text-sm mb-4">{s.label}</div>}
+              {s.heading && <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>}
+              {s.sub && <p className="mt-5 text-white/85 max-w-2xl mx-auto text-base md:text-lg">{s.sub}</p>}
               <Link to={s.to} params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
                 Explore Collection <ChevronRight size={16}/>
               </Link>
@@ -49,7 +62,7 @@ function Hero() {
         </div>
       ))}
       <div className="absolute bottom-8 left-0 right-0 flex justify-center gap-2 z-10">
-        {slides.map((_, idx) => (
+        {activeSlides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setI(idx)}

@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import { inr } from "@/lib/products";
+import { inr, globalSettings } from "@/lib/products";
+import { saveCustomerOrderFn } from "@/lib/server-functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Saha Marble & Tiles" }, { name: "description", content: "Complete your order at Saha Marble & Tiles." }] }),
@@ -43,7 +44,19 @@ function CheckoutPage() {
       `💰 *Grand Total:* ${inr(total)}`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/919330833711?text=${encodedMessage}`;
+    const phone = globalSettings.whatsapp_number || "919330833711";
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
+
+    // Save details to database asynchronously before redirection
+    saveCustomerOrderFn({
+      data: {
+        name: form.name,
+        mobile: form.mobile,
+        address: form.address,
+        items: items.map(i => ({ name: i.name, qty: i.qty })),
+        total: total
+      }
+    }).catch(err => console.error("Error logging customer order to DB:", err));
 
     const order = { items, total, form, pay: "WhatsApp", at: new Date().toISOString() };
     try { localStorage.setItem("saha_last_order", JSON.stringify(order)); } catch {}

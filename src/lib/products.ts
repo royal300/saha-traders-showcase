@@ -1,4 +1,5 @@
 import { catalogSeeds, categoryVisuals, showroomBanner } from "./images";
+import { getCategoriesFn, getProductsFn, getBannersFn, getSettingsFn } from "./server-functions";
 
 export { showroomBanner };
 
@@ -129,6 +130,12 @@ export const products: Product[] = Object.entries(catalogSeeds).flatMap(([slug, 
   make(slug, seeds, basePrices[slug] ?? 500),
 );
 
+export const globalSettings = {
+  whatsapp_number: "919330833711"
+};
+
+export const dynamicBanners: any[] = [];
+
 export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
 export const getProductsByCategory = (slug: string) => products.filter((p) => p.category === slug);
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
@@ -136,3 +143,57 @@ export const getFeatured = () =>
   categories.map((c) => products.find((p) => p.category === c.slug)!).filter(Boolean);
 
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
+
+// Hydrate categories, products, slides, and settings dynamically from VPS MySQL database
+export async function hydrateCatalog() {
+  try {
+    const dbCats = await getCategoriesFn();
+    if (dbCats && dbCats.length > 0) {
+      const parsedCats = dbCats.map((c: any) => ({
+        slug: c.slug,
+        name: c.name,
+        image: c.image,
+        banner: c.banner || c.image,
+        blurb: c.blurb || ""
+      }));
+      categories.splice(0, categories.length, ...parsedCats);
+    }
+
+    const dbProds = await getProductsFn();
+    if (dbProds && dbProds.length > 0) {
+      const parsedProds = dbProds.map((p: any) => {
+        let galleryArr = [];
+        let specsArr = [];
+        try { galleryArr = JSON.parse(p.gallery || "[]"); } catch { galleryArr = p.gallery || []; }
+        try { specsArr = JSON.parse(p.specs || "[]"); } catch { specsArr = p.specs || []; }
+
+        return {
+          slug: p.slug,
+          name: p.name,
+          category: p.category_slug,
+          price: parseFloat(p.price) || 0,
+          oldPrice: p.old_price ? parseFloat(p.old_price) : undefined,
+          rating: parseFloat(p.rating) || 5,
+          reviews: parseInt(p.reviews) || 0,
+          image: p.image,
+          gallery: galleryArr,
+          description: p.description || "",
+          specs: specsArr
+        };
+      });
+      products.splice(0, products.length, ...parsedProds);
+    }
+
+    const dbSettings = await getSettingsFn();
+    if (dbSettings && dbSettings.whatsapp_number) {
+      Object.assign(globalSettings, dbSettings);
+    }
+
+    const dbBanners = await getBannersFn();
+    if (dbBanners && dbBanners.length > 0) {
+      dynamicBanners.splice(0, dynamicBanners.length, ...dbBanners);
+    }
+  } catch (err) {
+    console.error("Storefront dynamic database hydration failed, using static fallbacks:", err);
+  }
+}
