@@ -27,7 +27,7 @@ function ImageUploadField({
   label, 
   value, 
   onChange, 
-  placeholder = "Select or upload an image...", 
+  placeholder = "Click to upload image...", 
   recommendedSize 
 }: { 
   label: string; 
@@ -58,6 +58,8 @@ function ImageUploadField({
         alert("Upload error: " + err.message);
       } finally {
         setIsUploading(false);
+        // Reset input so same file can be re-selected
+        if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
     reader.readAsDataURL(file);
@@ -65,60 +67,71 @@ function ImageUploadField({
 
   return (
     <div className="space-y-1.5 text-left">
-      <div className="flex justify-between items-center">
-        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)]">{label}</label>
+      <div className="flex justify-between items-center mb-1">
+        <label className="block text-xs uppercase tracking-wider font-semibold text-slate-700">{label}</label>
         {recommendedSize && (
-          <span className="text-[10px] text-[var(--charcoal)]/40 font-mono">Size: {recommendedSize}</span>
+          <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded">{recommendedSize}</span>
         )}
       </div>
       
-      <div className="flex items-center gap-3">
+      {/* Clickable upload area */}
+      <div
+        onClick={() => !isUploading && fileInputRef.current?.click()}
+        className={`relative rounded-xl border-2 transition-all cursor-pointer group overflow-hidden ${
+          value 
+            ? 'border-emerald-300 bg-emerald-50/30' 
+            : 'border-dashed border-slate-300 bg-slate-50 hover:border-[var(--gold)] hover:bg-amber-50/30'
+        }`}
+        style={{ minHeight: value ? '120px' : '90px' }}
+      >
         {value ? (
-          <div className="w-14 h-14 rounded-lg overflow-hidden border border-subtle bg-slate-50 shrink-0 relative group">
-            <img src={value} alt="Preview" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-[9px] text-white font-bold uppercase tracking-wider">Preview</span>
+          <>
+            <img 
+              src={value} 
+              alt="Preview" 
+              className="w-full h-32 object-cover rounded-lg"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center rounded-lg">
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow flex items-center gap-1.5">
+                <ImageIcon size={12} /> Change Image
+              </div>
             </div>
-          </div>
+            <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">✓ Uploaded</div>
+          </>
         ) : (
-          <div className="w-14 h-14 rounded-lg border border-dashed border-subtle bg-slate-50 shrink-0 flex items-center justify-center text-slate-400">
-            <ImageIcon size={20} className="opacity-40" />
+          <div className="flex flex-col items-center justify-center gap-2 py-6 px-4 text-center">
+            {isUploading ? (
+              <>
+                <Loader2 size={22} className="animate-spin text-[var(--gold)]" />
+                <span className="text-xs font-semibold text-slate-500">Uploading...</span>
+              </>
+            ) : (
+              <>
+                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
+                  <ImageIcon size={18} className="text-slate-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-slate-600">{placeholder}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP supported</div>
+                </div>
+              </>
+            )}
           </div>
         )}
-
-        <div className="flex-1 min-w-0">
-          <div className="flex gap-2">
-            <input 
-              type="text" 
-              readOnly 
-              value={value} 
-              className="ipt !py-2 text-xs !bg-slate-50/50 cursor-default truncate flex-1" 
-              placeholder={placeholder}
-            />
-            <button
-              type="button"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 border border-slate-brand text-slate-brand hover:bg-slate-brand hover:text-white transition-all text-xs font-bold rounded-md shrink-0 flex items-center gap-1 cursor-pointer disabled:opacity-50"
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 size={13} className="animate-spin" /> Uploading...
-                </>
-              ) : (
-                "Choose File"
-              )}
-            </button>
+        {isUploading && value && (
+          <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-lg">
+            <Loader2 size={22} className="animate-spin text-[var(--gold)]" />
           </div>
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept="image/*" 
-            className="hidden" 
-          />
-        </div>
+        )}
       </div>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        accept="image/jpeg,image/jpg,image/png,image/webp" 
+        className="hidden" 
+      />
     </div>
   );
 }
@@ -856,20 +869,24 @@ function AdminPage() {
                 </button>
               </div>
 
-              {/* Category Modal — only 3 fields */}
+              {/* Category Modal — 4 fields: Name, Image, Banner, Featured */}
               {editingCategory && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle">
-                      <h4 className="font-display font-semibold text-slate-brand text-base">
-                        {editingCategory.id ? "Edit Category" : "Add New Category"}
-                      </h4>
-                      <button type="button" onClick={() => setEditingCategory(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(15,23,42,0.6)', backdropFilter:'blur(6px)'}}>
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden" style={{boxShadow:'0 25px 60px rgba(0,0,0,0.25)'}}>
+                    {/* Modal Header */}
+                    <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 flex items-center justify-between">
+                      <div>
+                        <h4 className="font-display font-semibold text-white text-lg">
+                          {editingCategory.id ? "Edit Category" : "Add New Category"}
+                        </h4>
+                        <p className="text-white/50 text-xs mt-0.5">Fill in the details below</p>
+                      </div>
+                      <button type="button" onClick={() => setEditingCategory(null)} className="w-9 h-9 rounded-full bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center text-xl font-light transition-all cursor-pointer">&times;</button>
                     </div>
                     <form onSubmit={handleSaveCategory} className="p-6 space-y-5">
                       {/* Field 1: Category Name */}
                       <div>
-                        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Category Name *</label>
+                        <label className="block text-xs uppercase tracking-wider font-bold text-slate-600 mb-2">Category Name *</label>
                         <input 
                           required
                           type="text"
@@ -879,35 +896,60 @@ function AdminPage() {
                             const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
                             setEditingCategory({ ...editingCategory, name, slug });
                           }}
-                          className="ipt"
+                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[var(--gold)] focus:outline-none text-sm font-medium text-slate-800 bg-slate-50 transition-colors"
                           placeholder="e.g. Vitrified Tiles"
                           autoFocus
                         />
+                        {editingCategory.slug && (
+                          <div className="text-[10px] text-slate-400 mt-1.5 font-mono">URL: /category/{editingCategory.slug}</div>
+                        )}
                       </div>
 
-                      {/* Field 2: Image Upload */}
+                      {/* Field 2: Thumbnail Image */}
                       <ImageUploadField
-                        label="Category Image *"
+                        label="Category Thumbnail Image *"
                         value={editingCategory.image}
                         onChange={(url) => setEditingCategory({ ...editingCategory, image: url })}
-                        recommendedSize="500x500 px"
-                        placeholder="Upload JPG/PNG thumbnail..."
+                        recommendedSize="500×500 px (Square)"
+                        placeholder="Upload square thumbnail image"
                       />
 
-                      {/* Field 3: Feature in Home Screen */}
-                      <div className="flex items-center gap-3 bg-slate-50 border border-subtle rounded-lg px-4 py-3 cursor-pointer" onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}>
-                        <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all shrink-0 ${editingCategory.is_featured === 1 ? 'bg-[var(--gold)] border-[var(--gold)]' : 'bg-white border-slate-300'}`}>
-                          {editingCategory.is_featured === 1 && <Check size={12} className="text-slate-brand" strokeWidth={3} />}
+                      {/* Field 3: Banner Image */}
+                      <ImageUploadField
+                        label="Category Page Banner Image"
+                        value={editingCategory.banner || ""}
+                        onChange={(url) => setEditingCategory({ ...editingCategory, banner: url })}
+                        recommendedSize="1600×500 px (Wide)"
+                        placeholder="Upload wide banner for category page top"
+                      />
+
+                      {/* Field 4: Feature in Home Screen */}
+                      <div 
+                        className={`flex items-center gap-4 rounded-xl border-2 px-4 py-3.5 cursor-pointer transition-all ${
+                          editingCategory.is_featured === 1 
+                            ? 'border-amber-400 bg-amber-50' 
+                            : 'border-slate-200 bg-slate-50 hover:border-slate-300'
+                        }`}
+                        onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}
+                      >
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 shrink-0 transition-all ${
+                          editingCategory.is_featured === 1 
+                            ? 'bg-amber-400 border-amber-400' 
+                            : 'bg-white border-slate-300'
+                        }`}>
+                          {editingCategory.is_featured === 1 && <Check size={14} className="text-white" strokeWidth={3} />}
                         </div>
                         <div>
-                          <div className="text-xs font-bold text-slate-brand uppercase tracking-wider">Feature in Home Screen</div>
-                          <div className="text-[10px] text-[var(--charcoal)]/50 mt-0.5">Show this category in the homepage "Shop by Category" grid</div>
+                          <div className="text-sm font-bold text-slate-800">Feature on Home Screen</div>
+                          <div className="text-[11px] text-slate-500">Show in the homepage "Shop by Category" grid</div>
                         </div>
                       </div>
 
-                      <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                        <button type="button" onClick={() => setEditingCategory(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                        <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Category</button>
+                      <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={() => setEditingCategory(null)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
+                        <button type="submit" className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-bold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/20">
+                          {actionLoading ? <Loader2 size={16} className="animate-spin mx-auto" /> : 'Save Category'}
+                        </button>
                       </div>
                     </form>
                   </div>
@@ -930,8 +972,17 @@ function AdminPage() {
                       {categories.map((cat: any) => (
                         <tr key={cat.id} className="hover:bg-slate-50/50">
                           <td className="py-4 px-6">
-                            <div className="w-12 h-12 rounded overflow-hidden bg-slate-100 border border-subtle">
-                              <img src={cat.image} alt="" className="w-full h-full object-cover" />
+                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-subtle">
+                              {cat.image ? (
+                                <img 
+                                  src={cat.image} 
+                                  alt={cat.name} 
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f1f5f9"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%2394a3b8" font-size="18">?</text></svg>'; }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={16}/></div>
+                              )}
                             </div>
                           </td>
                           <td className="py-4 px-6">
@@ -1210,8 +1261,17 @@ function AdminPage() {
                         return (
                           <tr key={prod.id} className="hover:bg-slate-50/50">
                             <td className="py-4 px-6">
-                              <div className="w-12 h-12 rounded overflow-hidden bg-slate-100 border border-subtle">
-                                <img src={prod.image} alt="" className="w-full h-full object-cover" />
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-subtle">
+                                {prod.image ? (
+                                  <img 
+                                    src={prod.image} 
+                                    alt={prod.name} 
+                                    className="w-full h-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f1f5f9"/></svg>'; }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={16}/></div>
+                                )}
                               </div>
                             </td>
                             <td className="py-4 px-6">

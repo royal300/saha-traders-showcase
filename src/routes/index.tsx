@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
-import { categories, getFeatured, showroomBanner, dynamicBanners } from "@/lib/products";
+import { categories, getFeatured, getFeaturedCategories, showroomBanner, dynamicBanners } from "@/lib/products";
 import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
@@ -76,12 +76,15 @@ function Hero() {
 }
 
 function CategorySection() {
+  const featuredCats = getFeaturedCategories();
+  // fallback: if nothing is featured yet, show all
+  const displayCats = featuredCats.length > 0 ? featuredCats : categories;
   return (
     <section className="py-20">
       <div className="container-x">
         <h2 className="section-title mb-12">Shop by Category</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {categories.map((c, idx) => (
+          {displayCats.map((c, idx) => (
             <ScrollReveal key={c.slug} direction={idx % 2 === 0 ? "left" : "right"} delay={(idx % 4) * 100} className="h-full">
               <Link
                 to="/category/$slug"

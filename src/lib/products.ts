@@ -9,6 +9,7 @@ export type Category = {
   image: string;
   banner: string;
   blurb: string;
+  is_featured?: number;
 };
 
 export type Product = {
@@ -141,6 +142,8 @@ export const getProductsByCategory = (slug: string) => products.filter((p) => p.
 export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 export const getFeatured = () =>
   categories.map((c) => products.find((p) => p.category === c.slug)!).filter(Boolean);
+export const getFeaturedCategories = () =>
+  categories.filter((c) => c.is_featured === 1 || (c as any).is_featured === true || (c as any).is_featured === "1");
 
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 
@@ -154,7 +157,8 @@ export async function hydrateCatalog() {
         name: c.name,
         image: c.image,
         banner: c.banner || c.image,
-        blurb: c.blurb || ""
+        blurb: c.blurb || "",
+        is_featured: c.is_featured === 1 || c.is_featured === true || c.is_featured === "1" ? 1 : 0
       }));
       categories.splice(0, categories.length, ...parsedCats);
     }

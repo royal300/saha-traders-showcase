@@ -140,6 +140,14 @@ export const saveCategoryFn = createServerFn({ method: "POST" })
 export const deleteCategoryFn = createServerFn({ method: "POST" })
   .handler(async ({ id }: { id: number }) => {
     try {
+      // First get the slug so we can also delete products in this category
+      const [rows]: any = await pool.query("SELECT slug FROM categories WHERE id = ?", [id]);
+      if (rows && rows.length > 0) {
+        const slug = rows[0].slug;
+        // Delete all products belonging to this category
+        await pool.query("DELETE FROM products WHERE category_slug = ?", [slug]);
+      }
+      // Now delete the category itself
       await pool.query("DELETE FROM categories WHERE id = ?", [id]);
       return { success: true };
     } catch (e: any) {
