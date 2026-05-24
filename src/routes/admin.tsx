@@ -13,13 +13,210 @@ import {
   getCategoriesFn, saveCategoryFn, deleteCategoryFn,
   getProductsFn, saveProductFn, deleteProductFn,
   getCustomersFn,
-  getSettingsFn, updateSettingFn
+  getSettingsFn, updateSettingFn,
+  uploadImageFn
 } from "@/lib/server-functions";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Panel — Saha Marble & Tiles" }] }),
   component: AdminPage,
 });
+
+function ImageUploadField({ 
+  label, 
+  value, 
+  onChange, 
+  placeholder = "Select or upload an image...", 
+  recommendedSize 
+}: { 
+  label: string; 
+  value: string; 
+  onChange: (url: string) => void; 
+  placeholder?: string; 
+  recommendedSize?: string; 
+}) {
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = (reader.result as string).split(",")[1];
+      try {
+        const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
+        if (res.success && res.url) {
+          onChange(res.url);
+        } else {
+          alert("Upload failed: " + (res.error || "Unknown error"));
+        }
+      } catch (err: any) {
+        alert("Upload error: " + err.message);
+      } finally {
+        setIsUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="space-y-1.5 text-left">
+      <div className="flex justify-between items-center">
+        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)]">{label}</label>
+        {recommendedSize && (
+          <span className="text-[10px] text-[var(--charcoal)]/40 font-mono">Size: {recommendedSize}</span>
+        )}
+      </div>
+      
+      <div className="flex items-center gap-3">
+        {value ? (
+          <div className="w-14 h-14 rounded-lg overflow-hidden border border-subtle bg-slate-50 shrink-0 relative group">
+            <img src={value} alt="Preview" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-[9px] text-white font-bold uppercase tracking-wider">Preview</span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-14 h-14 rounded-lg border border-dashed border-subtle bg-slate-50 shrink-0 flex items-center justify-center text-slate-400">
+            <ImageIcon size={20} className="opacity-40" />
+          </div>
+        )}
+
+        <div className="flex-1 min-w-0">
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              readOnly 
+              value={value} 
+              className="ipt !py-2 text-xs !bg-slate-50/50 cursor-default truncate flex-1" 
+              placeholder={placeholder}
+            />
+            <button
+              type="button"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+              className="px-4 py-2 border border-slate-brand text-slate-brand hover:bg-slate-brand hover:text-white transition-all text-xs font-bold rounded-md shrink-0 flex items-center gap-1 cursor-pointer disabled:opacity-50"
+            >
+              {isUploading ? (
+                <>
+                  <Loader2 size={13} className="animate-spin" /> Uploading...
+                </>
+              ) : (
+                "Choose File"
+              )}
+            </button>
+          </div>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept="image/*" 
+            className="hidden" 
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GalleryUploadField({ 
+  gallery, 
+  onChange 
+}: { 
+  gallery: string[]; 
+  onChange: (newGallery: string[]) => void; 
+}) {
+  const [isUploading, setIsUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAddFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const newUrls = [...gallery];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const base64String = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
+          reader.readAsDataURL(file);
+        });
+        
+        const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
+        if (res.success && res.url) {
+          newUrls.push(res.url);
+        }
+      }
+      onChange(newUrls);
+    } catch (err: any) {
+      alert("Error uploading gallery image: " + err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    onChange(gallery.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  return (
+    <div className="space-y-2 text-left">
+      <div className="flex justify-between items-center border-b border-subtle pb-2">
+        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)]">Product Gallery Showcase Images</label>
+        <span className="text-[10px] text-[var(--charcoal)]/40 font-mono">Recommend: 800x800 px</span>
+      </div>
+      
+      <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
+        {gallery.map((url, idx) => (
+          <div key={idx} className="aspect-square rounded-lg border border-subtle bg-slate-50 relative group overflow-hidden">
+            <img src={url} alt="" className="w-full h-full object-cover" />
+            <button
+              type="button"
+              onClick={() => handleRemoveImage(idx)}
+              className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer text-xs font-bold"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        
+        <button
+          type="button"
+          disabled={isUploading}
+          onClick={() => fileInputRef.current?.click()}
+          className="aspect-square rounded-lg border-2 border-dashed border-slate-brand hover:border-slate-800 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 cursor-pointer"
+        >
+          {isUploading ? (
+            <>
+              <Loader2 size={18} className="animate-spin text-slate-brand" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Uploading...</span>
+            </>
+          ) : (
+            <>
+              <PlusCircle size={20} className="text-slate-brand" />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Add Image</span>
+            </>
+          )}
+        </button>
+      </div>
+      
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleAddFile}
+        accept="image/*"
+        multiple
+        className="hidden"
+      />
+    </div>
+  );
+}
 
 function AdminPage() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
@@ -478,16 +675,15 @@ function AdminPage() {
           {activeTab === "dashboard" && (
             <div className="space-y-8 animate-fade-up">
               {/* Analytics Metric Cards Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 {[
                   { label: "Products Catalog", count: stats.products, icon: ShoppingBag, color: "from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-blue-600" },
                   { label: "Tile Categories", count: stats.categories, icon: Tags, color: "from-amber-500/10 to-orange-500/10 border-amber-500/20 text-amber-600" },
                   { label: "Total Purchases", count: stats.customers, icon: Users, color: "from-emerald-500/10 to-teal-500/10 border-emerald-500/20 text-emerald-600" },
-                  { label: "Unique Visitors", count: stats.visitors, icon: Globe, color: "from-purple-500/10 to-pink-500/10 border-purple-500/20 text-purple-600" },
                 ].map((card, idx) => (
                   <div 
                     key={idx} 
-                    className={`bg-white border rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between relative overflow-hidden`}
+                    className="bg-white border rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between relative overflow-hidden"
                   >
                     <div className="text-left relative z-10">
                       <div className="text-2xl md:text-3xl font-display font-bold text-slate-brand leading-none">
@@ -504,75 +700,45 @@ function AdminPage() {
                 ))}
               </div>
 
-              {/* Analytics tables */}
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* 1. Recent WhatsApp checkout orders */}
-                <div className="bg-white border border-subtle rounded-xl p-5 shadow-sm text-left">
-                  <div className="flex items-center justify-between mb-5">
-                    <h3 className="font-display font-semibold text-slate-brand">Recent Orders</h3>
-                    <button 
-                      onClick={() => setActiveTab("customers")} 
-                      className="text-xs font-bold text-[var(--gold)] hover:text-slate-brand transition-colors flex items-center gap-1"
-                    >
-                      View All <ArrowRight size={12} />
-                    </button>
-                  </div>
-                  {stats.recentOrders.length === 0 ? (
-                    <div className="text-center py-10 text-[var(--charcoal)]/50 text-sm">No orders registered yet.</div>
-                  ) : (
-                    <div className="divide-y divide-subtle">
-                      {stats.recentOrders.map((ord: any) => (
-                        <div key={ord.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between text-sm">
-                          <div>
-                            <div className="font-semibold text-slate-brand">{ord.name}</div>
-                            <div className="text-xs text-[var(--charcoal)]/50">{ord.mobile} • {new Date(ord.created_at).toLocaleDateString()}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-[var(--gold)]">{inr(ord.total_price)}</div>
-                            <div className="text-[10px] text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded-full font-semibold uppercase">WhatsApp</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              {/* Analytics table: Recent WhatsApp checkout orders */}
+              <div className="bg-white border border-subtle rounded-xl p-6 shadow-sm text-left">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="font-display font-semibold text-slate-brand text-lg">Recent Orders</h3>
+                  <button 
+                    onClick={() => setActiveTab("customers")} 
+                    className="text-xs font-bold text-[var(--gold)] hover:text-slate-brand transition-colors flex items-center gap-1 bg-slate-50 border border-subtle hover:border-[var(--gold)]/50 rounded-full px-4 py-1.5 shadow-sm cursor-pointer"
+                  >
+                    View All Customers Log <ArrowRight size={12} />
+                  </button>
                 </div>
-
-                {/* 2. Unique IP address records */}
-                <div className="bg-white border border-subtle rounded-xl p-5 shadow-sm text-left">
-                  <div className="flex items-center justify-between mb-5">
-                    <h3 className="font-display font-semibold text-slate-brand">IP Visitor Tracking Log</h3>
-                    <span className="text-xs bg-slate-100 text-slate-600 py-1 px-3 rounded-full font-semibold">Active Unique: {stats.visitors}</span>
-                  </div>
+                {stats.recentOrders.length === 0 ? (
+                  <div className="text-center py-10 text-[var(--charcoal)]/50 text-sm">No orders registered yet.</div>
+                ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm text-left">
                       <thead>
-                        <tr className="border-b border-subtle text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold text-left">
-                          <th className="pb-3">Unique IP Address</th>
-                          <th className="pb-3 text-right">Last Visited Time</th>
+                        <tr className="border-b border-subtle bg-slate-50/50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
+                          <th className="py-3 px-4">Customer Name</th>
+                          <th className="py-3 px-4">Contact Number</th>
+                          <th className="py-3 px-4">Delivery Address</th>
+                          <th className="py-3 px-4 text-right">Order Date</th>
+                          <th className="py-3 px-4 text-right">Total Price</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-subtle">
-                        {stats.recentOrders.slice(0, 5).map((ord: any, idx: number) => (
-                          <tr key={idx}>
-                            <td className="py-3 font-mono text-xs text-[var(--slate)]">
-                              {/* Generate standard formatted IPs for stats presentation log */}
-                              93.127.206.{idx + 22}
-                            </td>
-                            <td className="py-3 text-right text-xs text-[var(--charcoal)]/50">
-                              {new Date(ord.created_at).toLocaleString()}
-                            </td>
+                        {stats.recentOrders.map((ord: any) => (
+                          <tr key={ord.id} className="hover:bg-slate-50/50">
+                            <td className="py-3.5 px-4 font-semibold text-slate-brand">{ord.name}</td>
+                            <td className="py-3.5 px-4 font-mono text-xs text-[var(--charcoal)]/80">{ord.mobile}</td>
+                            <td className="py-3.5 px-4 text-xs text-[var(--slate)] max-w-xs truncate">{ord.address}</td>
+                            <td className="py-3.5 px-4 text-right text-xs text-[var(--charcoal)]/50">{new Date(ord.created_at).toLocaleDateString()}</td>
+                            <td className="py-3.5 px-4 text-right font-bold text-[var(--gold)]">{inr(ord.total_price)}</td>
                           </tr>
                         ))}
-                        {stats.recentOrders.length === 0 && (
-                          <tr>
-                            <td className="py-3 font-mono text-xs text-[var(--slate)]">127.0.0.1 (Internal Host)</td>
-                            <td className="py-3 text-right text-xs text-[var(--charcoal)]/50">{new Date().toLocaleString()}</td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -587,91 +753,61 @@ function AdminPage() {
                   <h3 className="font-display font-semibold text-slate-brand text-lg">Slideshow Slider Images</h3>
                   <p className="text-xs text-[var(--charcoal)]/50">Add or manage banner slides running in your home page header slideshow.</p>
                 </div>
-                {!editingBanner && (
-                  <button 
-                    onClick={() => setEditingBanner({ image: "", heading: "", sub: "", label: "", slug: "", display_order: 1 })}
-                    className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                  >
-                    <Plus size={14} /> Add Slide Banner
-                  </button>
-                )}
+                <button 
+                  onClick={() => setEditingBanner({ image: "", heading: "", sub: "", label: "", slug: "", display_order: 1 })}
+                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
+                >
+                  <Plus size={14} /> Add Slide Banner
+                </button>
               </div>
 
-              {/* Editing Banner Form */}
+              {/* Banner Modal */}
               {editingBanner && (
-                <form onSubmit={handleSaveBanner} className="bg-white border border-subtle rounded-xl p-6 shadow-sm space-y-4">
-                  <h4 className="font-display font-semibold text-slate-brand border-b border-subtle pb-3">
-                    {editingBanner.id ? "Edit Slide Banner Details" : "Create New Slide Banner"}
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Banner Image URL *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingBanner.image}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, image: e.target.value })}
-                        className="ipt"
-                        placeholder="Image URL (Recommended: 1920x800 px)"
-                      />
-                      <span className="text-[10px] text-[var(--charcoal)]/50 mt-1 block">Specify high-res image URL (Standard banner scale: 1920x800px).</span>
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle">
+                      <h4 className="font-display font-semibold text-slate-brand text-base">
+                        {editingBanner.id ? "Edit Slide Banner" : "Add New Slide Banner"}
+                      </h4>
+                      <button type="button" onClick={() => setEditingBanner(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
                     </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Label (Mini Tag)</label>
-                      <input 
-                        type="text"
-                        value={editingBanner.label}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, label: e.target.value })}
-                        className="ipt"
-                        placeholder="e.g. Floor & Wall Tiles"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Heading</label>
-                      <input 
-                        type="text"
-                        value={editingBanner.heading}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, heading: e.target.value })}
-                        className="ipt"
-                        placeholder="Leave blank to show image only with no text overlay"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Subtitle Description</label>
-                      <input 
-                        type="text"
-                        value={editingBanner.sub}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, sub: e.target.value })}
-                        className="ipt"
-                        placeholder="e.g. Premium floor and wall tiles for homes"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Link Category Slug</label>
-                      <input 
-                        type="text"
-                        value={editingBanner.slug}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, slug: e.target.value })}
-                        className="ipt"
-                        placeholder="e.g. floor-tiles"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Display Order Order</label>
-                      <input 
-                        type="number"
-                        value={editingBanner.display_order}
-                        onChange={(e) => setEditingBanner({ ...editingBanner, display_order: parseInt(e.target.value) || 0 })}
-                        className="ipt"
-                        placeholder="Order number (ascending)"
-                      />
-                    </div>
+                    <form onSubmit={handleSaveBanner} className="p-6 space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <ImageUploadField
+                          label="Banner Image *"
+                          value={editingBanner.image}
+                          onChange={(url) => setEditingBanner({ ...editingBanner, image: url })}
+                          recommendedSize="1920x800 px"
+                          placeholder="Upload JPG/PNG banner slide..."
+                        />
+                        <div>
+                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Label (Mini Tag)</label>
+                          <input type="text" value={editingBanner.label} onChange={(e) => setEditingBanner({ ...editingBanner, label: e.target.value })} className="ipt" placeholder="e.g. Floor & Wall Tiles" />
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Heading</label>
+                          <input type="text" value={editingBanner.heading} onChange={(e) => setEditingBanner({ ...editingBanner, heading: e.target.value })} className="ipt" placeholder="Leave blank for image-only slide" />
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Subtitle</label>
+                          <input type="text" value={editingBanner.sub} onChange={(e) => setEditingBanner({ ...editingBanner, sub: e.target.value })} className="ipt" placeholder="e.g. Premium floor and wall tiles" />
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Link Category Slug</label>
+                          <input type="text" value={editingBanner.slug} onChange={(e) => setEditingBanner({ ...editingBanner, slug: e.target.value })} className="ipt" placeholder="e.g. floor-tiles" />
+                        </div>
+                        <div>
+                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Display Order</label>
+                          <input type="number" value={editingBanner.display_order} onChange={(e) => setEditingBanner({ ...editingBanner, display_order: parseInt(e.target.value) || 0 })} className="ipt" placeholder="1" />
+                        </div>
+                      </div>
+                      <div className="flex gap-3 justify-end border-t border-subtle pt-4">
+                        <button type="button" onClick={() => setEditingBanner(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
+                        <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Banner</button>
+                      </div>
+                    </form>
                   </div>
-                  <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                    <button type="button" onClick={() => setEditingBanner(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                    <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Banner</button>
-                  </div>
-                </form>
+                </div>
               )}
 
               {/* Banners display */}
@@ -681,39 +817,19 @@ function AdminPage() {
                     <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 relative">
                       <img src={ban.image} alt="" className="w-full h-full object-cover" />
                       {!ban.heading && (
-                        <div className="absolute top-2 right-2 bg-slate-900/80 text-white text-[9px] font-bold py-1 px-2.5 rounded">
-                          Image Only
-                        </div>
+                        <div className="absolute top-2 right-2 bg-slate-900/80 text-white text-[9px] font-bold py-1 px-2.5 rounded">Image Only</div>
                       )}
                     </div>
                     <div className="p-4 flex-1 flex flex-col justify-between">
                       <div className="text-left mb-4">
-                        <div className="text-[10px] uppercase font-bold text-[var(--gold)] tracking-wider">
-                          {ban.label || "No Tag Label"}
-                        </div>
-                        <h4 className="font-display font-semibold text-slate-brand text-sm line-clamp-1 mt-0.5">
-                          {ban.heading || "Image-Only Slide Banner"}
-                        </h4>
-                        <p className="text-[11px] text-[var(--charcoal)]/60 line-clamp-2 mt-1">
-                          {ban.sub || "This slide will display only the background image on your header slideshow with no text overlay."}
-                        </p>
-                        <div className="text-[10px] font-mono text-[var(--charcoal)]/50 mt-2">
-                          Order: {ban.display_order} • Path: /category/{ban.slug || "none"}
-                        </div>
+                        <div className="text-[10px] uppercase font-bold text-[var(--gold)] tracking-wider">{ban.label || "No Tag Label"}</div>
+                        <h4 className="font-display font-semibold text-slate-brand text-sm line-clamp-1 mt-0.5">{ban.heading || "Image-Only Slide"}</h4>
+                        <p className="text-[11px] text-[var(--charcoal)]/60 line-clamp-2 mt-1">{ban.sub || "Background image only slide."}</p>
+                        <div className="text-[10px] font-mono text-[var(--charcoal)]/50 mt-2">Order: {ban.display_order}</div>
                       </div>
                       <div className="flex gap-2 justify-end border-t border-subtle pt-3">
-                        <button 
-                          onClick={() => setEditingBanner(ban)}
-                          className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors"
-                        >
-                          <Edit size={13} />
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteBanner(ban.id)}
-                          className="w-8 h-8 rounded border border-subtle text-red-500 hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center transition-colors"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        <button onClick={() => setEditingBanner(ban)} className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors"><Edit size={13} /></button>
+                        <button onClick={() => handleDeleteBanner(ban.id)} className="w-8 h-8 rounded border border-subtle text-red-500 hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center transition-colors"><Trash2 size={13} /></button>
                       </div>
                     </div>
                   </div>
@@ -730,101 +846,72 @@ function AdminPage() {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-display font-semibold text-slate-brand text-lg">Category Manager</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50">Add, edit, or delete storefront tile categories visible in Nav Bar and listings.</p>
+                  <p className="text-xs text-[var(--charcoal)]/50">Add, edit, or delete storefront tile categories.</p>
                 </div>
-                {!editingCategory && (
-                  <button 
-                    onClick={() => setEditingCategory({ name: "", slug: "", image: "", banner: "", blurb: "", is_featured: 1 })}
-                    className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                  >
-                    <Plus size={14} /> Add Tile Category
-                  </button>
-                )}
+                <button 
+                  onClick={() => setEditingCategory({ name: "", slug: "", image: "", banner: "", blurb: "", is_featured: 1 })}
+                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
+                >
+                  <Plus size={14} /> Add Category
+                </button>
               </div>
 
-              {/* Editing Category Form */}
+              {/* Category Modal — only 3 fields */}
               {editingCategory && (
-                <form onSubmit={handleSaveCategory} className="bg-white border border-subtle rounded-xl p-6 shadow-sm space-y-4">
-                  <h4 className="font-display font-semibold text-slate-brand border-b border-subtle pb-3">
-                    {editingCategory.id ? "Edit Category Details" : "Create New Category"}
-                  </h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Category Name *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingCategory.name}
-                        onChange={(e) => {
-                          const name = e.target.value;
-                          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-                          setEditingCategory({ ...editingCategory, name, slug });
-                        }}
-                        className="ipt"
-                        placeholder="e.g. Vitrified Tiles"
-                      />
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle">
+                      <h4 className="font-display font-semibold text-slate-brand text-base">
+                        {editingCategory.id ? "Edit Category" : "Add New Category"}
+                      </h4>
+                      <button type="button" onClick={() => setEditingCategory(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
                     </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">URL URL Slug *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingCategory.slug}
-                        onChange={(e) => setEditingCategory({ ...editingCategory, slug: e.target.value })}
-                        className="ipt"
-                        placeholder="e.g. vitrified-tiles"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Thumbnail Image URL *</label>
-                      <input 
-                        required
-                        type="text"
+                    <form onSubmit={handleSaveCategory} className="p-6 space-y-5">
+                      {/* Field 1: Category Name */}
+                      <div>
+                        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Category Name *</label>
+                        <input 
+                          required
+                          type="text"
+                          value={editingCategory.name}
+                          onChange={(e) => {
+                            const name = e.target.value;
+                            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
+                            setEditingCategory({ ...editingCategory, name, slug });
+                          }}
+                          className="ipt"
+                          placeholder="e.g. Vitrified Tiles"
+                          autoFocus
+                        />
+                      </div>
+
+                      {/* Field 2: Image Upload */}
+                      <ImageUploadField
+                        label="Category Image *"
                         value={editingCategory.image}
-                        onChange={(e) => setEditingCategory({ ...editingCategory, image: e.target.value })}
-                        className="ipt"
-                        placeholder="Thumbnail URL (Recommended: 500x500 px)"
+                        onChange={(url) => setEditingCategory({ ...editingCategory, image: url })}
+                        recommendedSize="500x500 px"
+                        placeholder="Upload JPG/PNG thumbnail..."
                       />
-                      <span className="text-[10px] text-[var(--charcoal)]/50 mt-1 block">Visual representation shown in Shop by Category lists (Recommended size: 500x500px square).</span>
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Header Banner Image URL</label>
-                      <input 
-                        type="text"
-                        value={editingCategory.banner}
-                        onChange={(e) => setEditingCategory({ ...editingCategory, banner: e.target.value })}
-                        className="ipt"
-                        placeholder="Wide Header Image URL (e.g. 1600x600 px)"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Short blurb Description</label>
-                      <textarea 
-                        rows={2}
-                        value={editingCategory.blurb}
-                        onChange={(e) => setEditingCategory({ ...editingCategory, blurb: e.target.value })}
-                        className="ipt"
-                        placeholder="A clean introductory subtext for this category page..."
-                      />
-                    </div>
-                    <div className="md:col-span-2 flex items-center gap-2 py-2">
-                      <input
-                        type="checkbox"
-                        id="is_featured"
-                        checked={editingCategory.is_featured === 1}
-                        onChange={(e) => setEditingCategory({ ...editingCategory, is_featured: e.target.checked ? 1 : 0 })}
-                        className="w-4 h-4 text-[var(--gold)] focus:ring-[var(--gold)] border-subtle rounded"
-                      />
-                      <label htmlFor="is_featured" className="text-xs font-semibold text-slate-brand select-none cursor-pointer uppercase tracking-wider">
-                        Feature this Category in homepage "Shop by Category" Grid
-                      </label>
-                    </div>
+
+                      {/* Field 3: Feature in Home Screen */}
+                      <div className="flex items-center gap-3 bg-slate-50 border border-subtle rounded-lg px-4 py-3 cursor-pointer" onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}>
+                        <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all shrink-0 ${editingCategory.is_featured === 1 ? 'bg-[var(--gold)] border-[var(--gold)]' : 'bg-white border-slate-300'}`}>
+                          {editingCategory.is_featured === 1 && <Check size={12} className="text-slate-brand" strokeWidth={3} />}
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-slate-brand uppercase tracking-wider">Feature in Home Screen</div>
+                          <div className="text-[10px] text-[var(--charcoal)]/50 mt-0.5">Show this category in the homepage "Shop by Category" grid</div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 justify-end border-t border-subtle pt-4">
+                        <button type="button" onClick={() => setEditingCategory(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
+                        <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Category</button>
+                      </div>
+                    </form>
                   </div>
-                  <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                    <button type="button" onClick={() => setEditingCategory(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                    <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Category</button>
-                  </div>
-                </form>
+                </div>
               )}
 
               {/* Categories list table */}
@@ -833,10 +920,9 @@ function AdminPage() {
                   <table className="w-full text-sm text-left">
                     <thead>
                       <tr className="border-b border-subtle bg-slate-50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
-                        <th className="py-4 px-6 w-20">Thumb</th>
-                        <th className="py-4 px-6">Category Details</th>
-                        <th className="py-4 px-6">URL Slug</th>
-                        <th className="py-4 px-6 text-center">Featured Home</th>
+                        <th className="py-4 px-6 w-20">Image</th>
+                        <th className="py-4 px-6">Category Name</th>
+                        <th className="py-4 px-6 text-center">Featured on Home</th>
                         <th className="py-4 px-6 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -850,20 +936,19 @@ function AdminPage() {
                           </td>
                           <td className="py-4 px-6">
                             <div className="font-semibold text-slate-brand text-sm">{cat.name}</div>
-                            <div className="text-xs text-[var(--charcoal)]/60 line-clamp-1 mt-0.5">{cat.blurb || "No introductory blurb."}</div>
+                            <div className="text-[10px] font-mono text-[var(--charcoal)]/40 mt-0.5">{cat.slug}</div>
                           </td>
-                          <td className="py-4 px-6 font-mono text-xs text-[var(--charcoal)]/70">{cat.slug}</td>
                           <td className="py-4 px-6 text-center">
-                            {cat.is_featured === 1 ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-100 py-1 px-3 rounded-full uppercase">Yes</span>
+                            {(cat.is_featured === 1 || cat.is_featured === true || cat.is_featured === "1") ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 py-1 px-3 rounded-full uppercase">✓ Featured</span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--charcoal)]/40 bg-slate-100 py-1 px-3 rounded-full uppercase">No</span>
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--charcoal)]/40 bg-slate-100 py-1 px-3 rounded-full uppercase">Hidden</span>
                             )}
                           </td>
                           <td className="py-4 px-6 text-right">
                             <div className="flex gap-2 justify-end">
                               <button 
-                                onClick={() => setEditingCategory(cat)}
+                                onClick={() => setEditingCategory({ ...cat, is_featured: (cat.is_featured === 1 || cat.is_featured === true || cat.is_featured === "1") ? 1 : 0 })}
                                 className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors bg-white"
                               >
                                 <Edit size={13} />
@@ -878,6 +963,9 @@ function AdminPage() {
                           </td>
                         </tr>
                       ))}
+                      {categories.length === 0 && (
+                        <tr><td colSpan={4} className="py-12 text-center text-[var(--charcoal)]/50 text-sm">No categories yet. Click "Add Category" to create one.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -895,29 +983,33 @@ function AdminPage() {
                   <h3 className="font-display font-semibold text-slate-brand text-lg">Product Catalog Manager</h3>
                   <p className="text-xs text-[var(--charcoal)]/50">Manage your tiles catalog. Add, edit, or delete items instantly.</p>
                 </div>
-                {!editingProduct && (
-                  <button 
-                    onClick={() => setEditingProduct({ 
-                      id: "", slug: "", name: "", category_slug: categories[0]?.slug || "", 
-                      price: 0, old_price: 0, image: "", gallery: [], description: "", 
-                      details: ["Premium Quality Certified", "Available in bulk orders"], 
-                      specs: [{ label: "Material", value: "Ceramic" }, { label: "Size", value: "600 × 600 mm" }, { label: "Finish", value: "Glossy" }, { label: "Coverage", value: "4 tiles per box" }],
-                      shipping_info: "Delivered across Barasat and nearby areas within 2–4 business days. Free shipping on orders above ₹5000.",
-                      return_policy: "7-day hassle-free return on unused products in original packaging."
-                    })}
-                    className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                  >
-                    <Plus size={14} /> Create New Product
-                  </button>
-                )}
+                <button 
+                  onClick={() => setEditingProduct({ 
+                    id: "", slug: "", name: "", category_slug: categories[0]?.slug || "", 
+                    price: 0, old_price: 0, image: "", gallery: [], description: "", 
+                    details: ["Premium Quality Certified", "Available in bulk orders"], 
+                    specs: [{ label: "Material", value: "Ceramic" }, { label: "Size", value: "600 × 600 mm" }, { label: "Finish", value: "Glossy" }, { label: "Coverage", value: "4 tiles per box" }],
+                    shipping_info: "Delivered across Barasat and nearby areas within 2–4 business days. Free shipping on orders above ₹5000.",
+                    return_policy: "7-day hassle-free return on unused products in original packaging."
+                  })}
+                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
+                >
+                  <Plus size={14} /> Create New Product
+                </button>
               </div>
 
-              {/* Editing Product Form */}
+              {/* Product Modal */}
               {editingProduct && (
-                <form onSubmit={handleSaveProduct} className="bg-white border border-subtle rounded-xl p-6 shadow-sm space-y-5">
-                  <h4 className="font-display font-semibold text-slate-brand border-b border-subtle pb-3">
-                    {editingProduct.isEdit ? "Edit Product Specifications" : "Create New Product Catalog Entry"}
-                  </h4>
+                <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
+                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-6">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle sticky top-0 bg-white rounded-t-2xl z-10">
+                      <h4 className="font-display font-semibold text-slate-brand text-base">
+                        {editingProduct.isEdit ? "Edit Product" : "Create New Product"}
+                      </h4>
+                      <button type="button" onClick={() => setEditingProduct(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
+                    </div>
+                  <form onSubmit={handleSaveProduct} className="p-6 space-y-5">
+                  <div className=""></div>
                   
                   {/* Standard details grid */}
                   <div className="grid md:grid-cols-3 gap-4">
@@ -993,28 +1085,18 @@ function AdminPage() {
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-5 border-t border-subtle pt-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Main Image URL *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingProduct.image}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
-                        className="ipt"
-                        placeholder="Main Image URL (Recommended: 800x800 px square)"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Gallery Image URLs (one per line)</label>
-                      <textarea
-                        rows={2}
-                        value={Array.isArray(editingProduct.gallery) ? editingProduct.gallery.join("\n") : ""}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, gallery: e.target.value.split("\n").filter(Boolean) })}
-                        className="ipt"
-                        placeholder="Paste image URLs line-by-line..."
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-5 border-t border-subtle pt-4 space-y-2">
+                    <ImageUploadField
+                      label="Main Product Image *"
+                      value={editingProduct.image}
+                      onChange={(url) => setEditingProduct({ ...editingProduct, image: url })}
+                      recommendedSize="800x800 px (Square)"
+                      placeholder="Upload JPG/PNG main product showcase image..."
+                    />
+                    <GalleryUploadField
+                      gallery={editingProduct.gallery || []}
+                      onChange={(urls) => setEditingProduct({ ...editingProduct, gallery: urls })}
+                    />
                   </div>
 
                   <div className="border-t border-subtle pt-4 space-y-4">
@@ -1103,7 +1185,9 @@ function AdminPage() {
                     <button type="button" onClick={() => setEditingProduct(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
                     <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Product</button>
                   </div>
-                </form>
+                  </form>
+                  </div>
+                </div>
               )}
 
               {/* Products listing grid view */}

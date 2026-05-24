@@ -291,3 +291,42 @@ export const updateSettingFn = createServerFn({ method: "POST" })
       return { success: false, error: e.message };
     }
   });
+
+// ==========================================
+// 8. Image File Uploader
+// ==========================================
+export const uploadImageFn = createServerFn({ method: "POST" })
+  .handler(async ({ data }: { data: { fileName: string; base64Data: string } }) => {
+    const { fileName, base64Data } = data;
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+
+      const buffer = Buffer.from(base64Data, "base64");
+
+      // Clean the filename of special characters
+      const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const uniqueName = `${Date.now()}_${cleanName}`;
+
+      const publicDir = path.join(process.cwd(), "public");
+      const uploadsDir = path.join(publicDir, "uploads");
+
+      // Ensure that public and public/uploads directories exist on disk
+      if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir);
+      }
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir);
+      }
+
+      const filePath = path.join(uploadsDir, uniqueName);
+      fs.writeFileSync(filePath, buffer);
+
+      // Return the public relative path served dynamically by Vite/Vinxi
+      return { success: true, url: `/uploads/${uniqueName}` };
+    } catch (e: any) {
+      console.error("Error uploading image:", e);
+      return { success: false, error: e.message };
+    }
+  });
+
