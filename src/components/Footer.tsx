@@ -39,8 +39,8 @@ export function Footer() {
         <div>
           <h4 className="text-white uppercase tracking-wider text-sm mb-4">Get in Touch</h4>
           <ul className="space-y-3 text-sm">
-            <li className="flex gap-2"><MapPin size={16} className="text-[var(--gold)] mt-0.5 shrink-0"/> Saha Traders, Barasat, West Bengal</li>
-            <li className="flex gap-2"><Phone size={16} className="text-[var(--gold)] mt-0.5 shrink-0"/> +91 98765 43210</li>
+            <li className="flex gap-2"><MapPin size={16} className="text-[var(--gold)] mt-0.5 shrink-0"/> Barrackpore - Barasat Rd, opp. Loknath Mandir, Barasat, Kolkata, West Bengal 700126</li>
+            <li className="flex gap-2"><Phone size={16} className="text-[var(--gold)] mt-0.5 shrink-0"/> +91 98369 34398</li>
             <li className="flex gap-2"><Mail size={16} className="text-[var(--gold)] mt-0.5 shrink-0"/> info@sahatraders.com</li>
           </ul>
           <div className="flex gap-3 mt-5">

@@ -59,8 +59,8 @@ function ContactPage() {
 
         <div className="space-y-4">
           {[
-            { I: MapPin, t: "Address", d: "Saha Traders, Main Road, Barasat, West Bengal 700124" },
-            { I: Phone, t: "Phone", d: "+91 98765 43210" },
+            { I: MapPin, t: "Address", d: "Barrackpore - Barasat Rd, opp. Loknath Mandir, Barasat, Kolkata, West Bengal 700126" },
+            { I: Phone, t: "Phone", d: "+91 98369 34398" },
             { I: Mail, t: "Email", d: "info@sahatraders.com" },
             { I: Clock, t: "Hours", d: "Mon–Sat, 10AM – 7PM" },
           ].map((c) => (
