@@ -185,19 +185,19 @@ function TrustedDealers() {
   const marqueeItems = [...list, ...list, ...list, ...list, ...list, ...list];
 
   return (
-    <section className="py-8 bg-white border-y border-subtle overflow-hidden">
+    <section className="py-20 bg-slate-50/70 border-y border-subtle overflow-hidden">
       <div className="container-x">
-        <h3 className="text-center font-display text-base md:text-lg text-[var(--charcoal)]/70 uppercase tracking-[0.25em] mb-6">
-          Trusted Dealer Of
-        </h3>
+        <h2 className="section-title mb-14 text-center">
+          Trusted Brand Partners
+        </h2>
         <div className="relative w-full overflow-hidden mask-gradient">
-          <div className="flex gap-12 md:gap-20 items-center w-max animate-marquee whitespace-nowrap">
+          <div className="flex gap-16 md:gap-28 items-center w-max animate-marquee whitespace-nowrap">
             {marqueeItems.map((logo, idx) => (
               <img
                 key={idx}
                 src={logo}
                 alt="Brand logo"
-                className="h-8 md:h-11 w-auto object-contain grayscale hover:grayscale-0 opacity-55 hover:opacity-100 transition-all duration-300 shrink-0"
+                className="h-14 md:h-20 w-auto object-contain opacity-95 hover:opacity-100 hover:scale-105 transition-all duration-300 shrink-0"
               />
             ))}
           </div>
