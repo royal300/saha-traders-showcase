@@ -147,8 +147,16 @@ export const getFeaturedCategories = () =>
 
 export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 
+let lastHydrated = 0;
+const HYDRATION_CACHE_TTL = 30000; // 30 seconds cache TTL
+
 // Hydrate categories, products, slides, and settings dynamically from VPS MySQL database
-export async function hydrateCatalog() {
+export async function hydrateCatalog(force = false) {
+  const now = Date.now();
+  if (!force && now - lastHydrated < HYDRATION_CACHE_TTL && categories.length > 0 && products.length > 0) {
+    return;
+  }
+
   try {
     const dbCats = await getCategoriesFn();
     if (dbCats && dbCats.length > 0) {
@@ -197,6 +205,8 @@ export async function hydrateCatalog() {
     if (dbBanners && dbBanners.length > 0) {
       dynamicBanners.splice(0, dynamicBanners.length, ...dbBanners);
     }
+
+    lastHydrated = Date.now();
   } catch (err) {
     console.error("Storefront dynamic database hydration failed, using static fallbacks:", err);
   }

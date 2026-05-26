@@ -99,6 +99,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
   }),
+  loader: async () => {
+    await hydrateCatalog();
+    return {};
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -123,9 +127,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   React.useEffect(() => {
-    // Hydrate catalog from database
-    hydrateCatalog().catch(err => console.error("Error hydrating catalog:", err));
-    // Log unique visitor IP securely
+    // Log unique visitor IP securely on mount
     trackVisitorFn().catch(err => console.error("Error tracking visitor:", err));
   }, []);
 
