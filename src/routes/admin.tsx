@@ -899,90 +899,93 @@ function AdminPage() {
                 </button>
               </div>
 
-              {/* Category Modal — 4 fields: Name, Image, Banner, Featured */}
+              {/* Category Collapsible Inline Form — 4 fields: Name, Image, Banner, Featured */}
               {editingCategory && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(15,23,42,0.6)', backdropFilter:'blur(6px)'}}>
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden" style={{boxShadow:'0 25px 60px rgba(0,0,0,0.25)'}}>
-                    {/* Modal Header */}
-                    <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-5 flex items-center justify-between">
-                      <div>
-                        <h4 className="font-display font-semibold text-white text-lg">
-                          {editingCategory.id ? "Edit Category" : "Add New Category"}
-                        </h4>
-                        <p className="text-white/50 text-xs mt-0.5">Fill in the details below</p>
-                      </div>
-                      <button type="button" onClick={() => setEditingCategory(null)} className="w-9 h-9 rounded-full bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center text-xl font-light transition-all cursor-pointer">&times;</button>
+                <div className="bg-white rounded-2xl border border-subtle shadow-md overflow-hidden animate-fade-down mb-6">
+                  {/* Form Header */}
+                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-4.5 flex items-center justify-between">
+                    <div>
+                      <h4 className="font-display font-semibold text-white text-base">
+                        {editingCategory.id ? "✏️ Edit Category" : "✨ Add New Category"}
+                      </h4>
+                      <p className="text-white/50 text-[10px] uppercase tracking-wider font-semibold mt-0.5">Instant Category Creator</p>
                     </div>
-                    <form onSubmit={handleSaveCategory} className="p-6 space-y-5">
-                      {/* Field 1: Category Name */}
-                      <div>
-                        <label className="block text-xs uppercase tracking-wider font-bold text-slate-600 mb-2">Category Name *</label>
-                        <input 
-                          required
-                          type="text"
-                          value={editingCategory.name}
-                          onChange={(e) => {
-                            const name = e.target.value;
-                            const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
-                            setEditingCategory({ ...editingCategory, name, slug });
-                          }}
-                          className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[var(--gold)] focus:outline-none text-sm font-medium text-slate-800 bg-slate-50 transition-colors"
-                          placeholder="e.g. Vitrified Tiles"
-                          autoFocus
-                        />
-                        {editingCategory.slug && (
-                          <div className="text-[10px] text-slate-400 mt-1.5 font-mono">URL: /category/{editingCategory.slug}</div>
-                        )}
-                      </div>
-
-                      {/* Field 2: Thumbnail Image */}
-                      <ImageUploadField
-                        label="Category Thumbnail Image *"
-                        value={editingCategory.image}
-                        onChange={(url) => setEditingCategory({ ...editingCategory, image: url })}
-                        recommendedSize="500×500 px (Square)"
-                        placeholder="Upload square thumbnail image"
-                      />
-
-                      {/* Field 3: Banner Image */}
-                      <ImageUploadField
-                        label="Category Page Banner Image"
-                        value={editingCategory.banner || ""}
-                        onChange={(url) => setEditingCategory({ ...editingCategory, banner: url })}
-                        recommendedSize="1600×500 px (Wide)"
-                        placeholder="Upload wide banner for category page top"
-                      />
-
-                      {/* Field 4: Feature in Home Screen */}
-                      <div 
-                        className={`flex items-center gap-4 rounded-xl border-2 px-4 py-3.5 cursor-pointer transition-all ${
-                          editingCategory.is_featured === 1 
-                            ? 'border-amber-400 bg-amber-50' 
-                            : 'border-slate-200 bg-slate-50 hover:border-slate-300'
-                        }`}
-                        onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}
-                      >
-                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center border-2 shrink-0 transition-all ${
-                          editingCategory.is_featured === 1 
-                            ? 'bg-amber-400 border-amber-400' 
-                            : 'bg-white border-slate-300'
-                        }`}>
-                          {editingCategory.is_featured === 1 && <Check size={14} className="text-white" strokeWidth={3} />}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-slate-800">Feature on Home Screen</div>
-                          <div className="text-[11px] text-slate-500">Show in the homepage "Shop by Category" grid</div>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => setEditingCategory(null)} className="flex-1 py-3 rounded-xl border-2 border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
-                        <button type="submit" className="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white text-sm font-bold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/20">
-                          {actionLoading ? <Loader2 size={16} className="animate-spin mx-auto" /> : 'Save Category'}
-                        </button>
-                      </div>
-                    </form>
+                    <button type="button" onClick={() => setEditingCategory(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center text-lg font-light transition-all cursor-pointer">&times;</button>
                   </div>
+                  <form onSubmit={handleSaveCategory} className="p-6 space-y-5">
+                    {/* Grid to align side by side and prevent vertical bloating */}
+                    <div className="grid md:grid-cols-2 gap-5">
+                      {/* Left Column: Name & Featured Toggle */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Category Name *</label>
+                          <input 
+                            required
+                            type="text"
+                            value={editingCategory.name}
+                            onChange={(e) => {
+                              const name = e.target.value;
+                              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
+                              setEditingCategory({ ...editingCategory, name, slug });
+                            }}
+                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[var(--gold)] focus:outline-none text-sm font-medium text-slate-800 bg-slate-50 transition-colors"
+                            placeholder="e.g. Vitrified Tiles"
+                            autoFocus
+                          />
+                          {editingCategory.slug && (
+                            <div className="text-[9px] text-slate-400 mt-1 font-mono">URL: /category/{editingCategory.slug}</div>
+                          )}
+                        </div>
+
+                        {/* Feature Toggle */}
+                        <div 
+                          className={`flex items-center gap-3.5 rounded-xl border-2 px-3.5 py-3 cursor-pointer transition-all ${
+                            editingCategory.is_featured === 1 
+                              ? 'border-amber-400 bg-amber-50/50' 
+                              : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+                          }`}
+                          onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}
+                        >
+                          <div className={`w-5 h-5 rounded-lg flex items-center justify-center border-2 shrink-0 transition-all ${
+                            editingCategory.is_featured === 1 
+                              ? 'bg-amber-400 border-amber-400' 
+                              : 'bg-white border-slate-300'
+                          }`}>
+                            {editingCategory.is_featured === 1 && <Check size={11} className="text-white" strokeWidth={3.5} />}
+                          </div>
+                          <div className="leading-tight">
+                            <div className="text-xs font-bold text-slate-700">Feature on Home Screen</div>
+                            <div className="text-[9px] text-slate-400 mt-0.5">Show inside "Shop by Category" grid</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Column: Thumbnail & Wide Banner side by side */}
+                      <div className="space-y-4">
+                        <ImageUploadField
+                          label="Category Thumbnail Image *"
+                          value={editingCategory.image}
+                          onChange={(url) => setEditingCategory({ ...editingCategory, image: url })}
+                          recommendedSize="500×500 px (Square)"
+                          placeholder="Upload square thumbnail image"
+                        />
+                        <ImageUploadField
+                          label="Category Page Banner Image"
+                          value={editingCategory.banner || ""}
+                          onChange={(url) => setEditingCategory({ ...editingCategory, banner: url })}
+                          recommendedSize="1600×500 px (Wide)"
+                          placeholder="Upload wide banner for category page top"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3 justify-end border-t border-subtle pt-4">
+                      <button type="button" onClick={() => setEditingCategory(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
+                      <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold min-w-[120px]">
+                        {actionLoading ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Save Category'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
 

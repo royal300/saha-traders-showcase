@@ -151,8 +151,9 @@ export const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 export async function hydrateCatalog(force = false) {
   try {
     const dbCats = await getCategoriesFn();
-    if (dbCats && dbCats.length > 0) {
+    if (dbCats) {
       const parsedCats = dbCats.map((c: any) => ({
+        id: c.id,
         slug: c.slug,
         name: c.name,
         image: c.image,
@@ -164,7 +165,7 @@ export async function hydrateCatalog(force = false) {
     }
 
     const dbProds = await getProductsFn();
-    if (dbProds && dbProds.length > 0) {
+    if (dbProds) {
       const parsedProds = dbProds.map((p: any) => {
         let galleryArr = [];
         let specsArr = [];
@@ -172,6 +173,7 @@ export async function hydrateCatalog(force = false) {
         try { specsArr = JSON.parse(p.specs || "[]"); } catch { specsArr = p.specs || []; }
 
         return {
+          id: p.id,
           slug: p.slug,
           name: p.name,
           category: p.category_slug,
@@ -194,7 +196,7 @@ export async function hydrateCatalog(force = false) {
     }
 
     const dbBanners = await getBannersFn();
-    if (dbBanners && dbBanners.length > 0) {
+    if (dbBanners) {
       dynamicBanners.splice(0, dynamicBanners.length, ...dbBanners);
     }
 

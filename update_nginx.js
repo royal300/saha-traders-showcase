@@ -6,6 +6,12 @@ const nginxConfig = `server {
 
     root /var/www/saha_traders/dist/client;
 
+    location /uploads/ {
+        alias /var/www/saha_traders/public/uploads/;
+        access_log off;
+        expires max;
+    }
+
     location / {
         try_files $uri @proxy;
     }
