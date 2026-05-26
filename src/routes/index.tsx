@@ -135,17 +135,36 @@ function WhyUs() {
     { icon: RotateCcw, title: "Easy Returns", text: "Hassle-free return policy" },
   ];
   return (
-    <section className="bg-slate-brand text-white py-10 md:py-14">
-      <div className="container-x grid grid-cols-2 lg:grid-cols-4 gap-y-7 gap-x-4 md:divide-x divide-white/10">
-        {items.map((I) => (
-          <div key={I.title} className="px-1 md:px-5 text-center">
-            <I.icon size={26} className="text-[var(--gold)] mx-auto mb-2" />
-            <h4 className="font-display text-sm md:text-base text-white mb-1">{I.title}</h4>
-            <p className="text-[11px] md:text-xs text-white/70 leading-snug">{I.text}</p>
-          </div>
-        ))}
+    <div className="relative">
+      {/* Top wavy divider — white wave cuts into the navy */}
+      <div className="relative w-full overflow-hidden leading-none" style={{ height: '52px' }}>
+        <svg viewBox="0 0 1440 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" className="absolute bottom-0 w-full h-full">
+          <path d="M0,26 C240,52 480,0 720,26 C960,52 1200,0 1440,26 L1440,52 L0,52 Z" fill="white" />
+        </svg>
+        <div className="absolute inset-0 bg-[var(--slate)]" style={{zIndex:-1}} />
       </div>
-    </section>
+
+      {/* Navy content */}
+      <section className="bg-slate-brand text-white py-10 md:py-14">
+        <div className="container-x grid grid-cols-2 lg:grid-cols-4 gap-y-7 gap-x-4 md:divide-x divide-white/10">
+          {items.map((I) => (
+            <div key={I.title} className="px-1 md:px-5 text-center">
+              <I.icon size={26} className="text-[var(--gold)] mx-auto mb-2" />
+              <h4 className="font-display text-sm md:text-base text-white mb-1">{I.title}</h4>
+              <p className="text-[11px] md:text-xs text-white/70 leading-snug">{I.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Bottom wavy divider — navy peels back to white */}
+      <div className="relative w-full overflow-hidden leading-none" style={{ height: '52px' }}>
+        <svg viewBox="0 0 1440 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-0 w-full h-full">
+          <path d="M0,26 C240,0 480,52 720,26 C960,0 1200,52 1440,26 L1440,0 L0,0 Z" fill="white" />
+        </svg>
+        <div className="absolute inset-0 bg-[var(--slate)]" style={{zIndex:-1}} />
+      </div>
+    </div>
   );
 }
 
