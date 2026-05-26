@@ -6,8 +6,7 @@ import { useCart } from "@/lib/cart";
 import logoPng from "@/logo.png";
 
 export function Navbar() {
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const categoriesList = rootData?.categories || categories;
+  const categoriesList = categories;
 
   const [mobile, setMobile] = React.useState(false);
   const [catOpen, setCatOpen] = React.useState(false);

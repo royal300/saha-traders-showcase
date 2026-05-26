@@ -1,7 +1,7 @@
-import { createFileRoute, Link, notFound, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Plus, Minus, ShoppingBag, Star, Check, ChevronDown } from "lucide-react";
-import { getProduct, getProductsByCategory, getCategory, inr } from "@/lib/products";
+import { getProduct, categories, products, hydrateCatalog, inr } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { useCart } from "@/lib/cart";
 import { useNavigate } from "@tanstack/react-router";
@@ -21,10 +21,15 @@ export const Route = createFileRoute("/product/$slug")({
       ],
     };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    await hydrateCatalog(true);
     const p = getProduct(params.slug);
     if (!p) throw notFound();
-    return p;
+    return {
+      product: p,
+      categories: [...categories],
+      products: [...products]
+    };
   },
   component: ProductPage,
   notFoundComponent: () => (
@@ -37,11 +42,7 @@ export const Route = createFileRoute("/product/$slug")({
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const categoriesList = rootData?.categories || [];
-  const productsList = rootData?.products || [];
-
-  const p = React.useMemo(() => productsList.find((x: any) => x.slug === slug)!, [productsList, slug]);
+  const { product: p, categories: categoriesList, products: productsList } = Route.useLoaderData();
   const cat = React.useMemo(() => categoriesList.find((c: any) => c.slug === p.category)!, [categoriesList, p]);
   const related = React.useMemo(() => {
     return productsList.filter((x: any) => x.category === p.category && x.slug !== p.slug).slice(0, 4);

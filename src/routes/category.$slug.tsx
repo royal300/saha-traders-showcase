@@ -1,7 +1,7 @@
-import { createFileRoute, Link, notFound, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight } from "lucide-react";
-import { getCategory, getProductsByCategory, categories } from "@/lib/products";
+import { getCategory, categories, products, hydrateCatalog } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
 
@@ -19,10 +19,15 @@ export const Route = createFileRoute("/category/$slug")({
       ],
     };
   },
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
+    await hydrateCatalog(true);
     const c = getCategory(params.slug);
     if (!c) throw notFound();
-    return c;
+    return {
+      category: c,
+      categories: [...categories],
+      products: [...products]
+    };
   },
   component: CategoryPage,
   notFoundComponent: () => (
@@ -37,11 +42,7 @@ type Sort = "default" | "asc" | "desc" | "new";
 
 function CategoryPage() {
   const { slug } = Route.useParams();
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const categoriesList = rootData?.categories || [];
-  const productsList = rootData?.products || [];
-
-  const c = React.useMemo(() => categoriesList.find((x: any) => x.slug === slug)!, [categoriesList, slug]);
+  const { category: c, categories: categoriesList, products: productsList } = Route.useLoaderData();
   const base = React.useMemo(() => productsList.filter((p: any) => p.category === slug), [productsList, slug]);
   const [sort, setSort] = React.useState<Sort>("default");
 

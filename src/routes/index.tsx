@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
-import { categories, getFeatured, getFeaturedCategories, showroomBanner, dynamicBanners } from "@/lib/products";
+import { categories, products, dynamicBanners, hydrateCatalog, showroomBanner } from "@/lib/products";
 import { heroSlides } from "@/lib/images";
 import { ProductCard } from "@/components/ProductCard";
 import { SafeImage } from "@/components/SafeImage";
@@ -12,12 +12,19 @@ import rudLogo from "@/rud.jpg";
 import sochLogo from "@/soch.jpg";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    await hydrateCatalog(true);
+    return {
+      categories: [...categories],
+      products: [...products],
+      banners: [...dynamicBanners],
+    };
+  },
   component: Index,
 });
 
 function Hero() {
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const bannersList = rootData?.banners || [];
+  const { banners: bannersList } = Route.useLoaderData();
 
   const activeSlides = React.useMemo(() => {
     if (bannersList && bannersList.length > 0) {
@@ -84,8 +91,7 @@ function Hero() {
 }
 
 function CategorySection() {
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const categoriesList = rootData?.categories || [];
+  const { categories: categoriesList } = Route.useLoaderData();
 
   const featuredCats = React.useMemo(() => {
     return categoriesList.filter((c: any) => c.is_featured === 1 || c.is_featured === true || c.is_featured === "1");
@@ -123,9 +129,7 @@ function CategorySection() {
 }
 
 function FeaturedSection() {
-  const rootData = useLoaderData({ from: "__root__" }) as any;
-  const categoriesList = rootData?.categories || [];
-  const productsList = rootData?.products || [];
+  const { categories: categoriesList, products: productsList } = Route.useLoaderData();
 
   const featured = React.useMemo(() => {
     return categoriesList
