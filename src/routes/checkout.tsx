@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useLoaderData } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { useCart } from "@/lib/cart";
@@ -11,6 +11,9 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function CheckoutPage() {
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const settings = rootData?.settings || globalSettings;
+
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
@@ -44,7 +47,7 @@ function CheckoutPage() {
       `💰 *Grand Total:* ${inr(total)}`;
 
     const encodedMessage = encodeURIComponent(message);
-    const phone = globalSettings.whatsapp_number || "919330833711";
+    const phone = settings.whatsapp_number || "919330833711";
     const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`;
 
     // Save details to database asynchronously before redirection

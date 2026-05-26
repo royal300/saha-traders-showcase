@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useLoaderData } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight, Award, Truck, MessageSquare, RotateCcw, Star, Quote } from "lucide-react";
 import { categories, getFeatured, getFeaturedCategories, showroomBanner, dynamicBanners } from "@/lib/products";
@@ -17,9 +16,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Hero() {
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const bannersList = rootData?.banners || [];
+
   const activeSlides = React.useMemo(() => {
-    if (dynamicBanners && dynamicBanners.length > 0) {
-      return dynamicBanners.map(s => ({
+    if (bannersList && bannersList.length > 0) {
+      return bannersList.map((s: any) => ({
         slug: s.slug || "",
         label: s.label || "",
         heading: s.heading || "",
@@ -32,7 +34,7 @@ function Hero() {
       ...s,
       to: "/category/$slug" as const,
     }));
-  }, []);
+  }, [bannersList]);
 
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
@@ -82,9 +84,15 @@ function Hero() {
 }
 
 function CategorySection() {
-  const featuredCats = getFeaturedCategories();
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categoriesList = rootData?.categories || [];
+
+  const featuredCats = React.useMemo(() => {
+    return categoriesList.filter((c: any) => c.is_featured === 1 || c.is_featured === true || c.is_featured === "1");
+  }, [categoriesList]);
+
   // fallback: if nothing is featured yet, show all
-  const displayCats = featuredCats.length > 0 ? featuredCats : categories;
+  const displayCats = featuredCats.length > 0 ? featuredCats : categoriesList;
   return (
     <section className="py-20">
       <div className="container-x">
@@ -115,7 +123,15 @@ function CategorySection() {
 }
 
 function FeaturedSection() {
-  const featured = getFeatured();
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categoriesList = rootData?.categories || [];
+  const productsList = rootData?.products || [];
+
+  const featured = React.useMemo(() => {
+    return categoriesList
+      .map((c: any) => productsList.find((p: any) => p.category === c.slug)!)
+      .filter(Boolean);
+  }, [categoriesList, productsList]);
   return (
     <section className="py-20 bg-white">
       <div className="container-x">

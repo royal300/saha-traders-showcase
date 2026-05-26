@@ -1,11 +1,14 @@
 import * as React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useLoaderData } from "@tanstack/react-router";
 import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
 import { categories } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import logoPng from "@/logo.png";
 
 export function Navbar() {
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categoriesList = rootData?.categories || categories;
+
   const [mobile, setMobile] = React.useState(false);
   const [catOpen, setCatOpen] = React.useState(false);
   const { count, setOpen } = useCart();
@@ -51,7 +54,7 @@ export function Navbar() {
               }`}
               style={{ transformOrigin: "top" }}
             >
-              {categories.map((c) => (
+              {categoriesList.map((c) => (
                 <Link
                   key={c.slug}
                   to="/category/$slug"
@@ -105,7 +108,7 @@ export function Navbar() {
               <div className="border-t border-white/10 pt-4 mt-2">
                 <div className="text-[var(--gold)] uppercase text-xs tracking-wider mb-3">Categories</div>
                 <div className="flex flex-col gap-2">
-                  {categories.map((c) => (
+                  {categoriesList.map((c) => (
                     <Link
                       key={c.slug}
                       to="/category/$slug"

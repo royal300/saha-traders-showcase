@@ -17,7 +17,7 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingCartBar } from "@/components/FloatingCartBar";
 import { Toaster } from "@/components/ui/sonner";
 import { trackVisitorFn } from "@/lib/server-functions";
-import { hydrateCatalog } from "@/lib/products";
+import { hydrateCatalog, categories, products, dynamicBanners, globalSettings } from "@/lib/products";
 
 function NotFoundComponent() {
   return (
@@ -101,8 +101,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
   }),
   loader: async () => {
-    await hydrateCatalog();
-    return {};
+    await hydrateCatalog(true);
+    return {
+      categories: [...categories],
+      products: [...products],
+      banners: [...dynamicBanners],
+      settings: { ...globalSettings }
+    };
   },
   shellComponent: RootShell,
   component: RootComponent,

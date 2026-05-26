@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useLoaderData } from "@tanstack/react-router";
 import * as React from "react";
 import { ChevronRight } from "lucide-react";
 import { getCategory, getProductsByCategory, categories } from "@/lib/products";
@@ -37,8 +37,12 @@ type Sort = "default" | "asc" | "desc" | "new";
 
 function CategoryPage() {
   const { slug } = Route.useParams();
-  const c = getCategory(slug)!;
-  const base = React.useMemo(() => getProductsByCategory(slug), [slug]);
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categoriesList = rootData?.categories || [];
+  const productsList = rootData?.products || [];
+
+  const c = React.useMemo(() => categoriesList.find((x: any) => x.slug === slug)!, [categoriesList, slug]);
+  const base = React.useMemo(() => productsList.filter((p: any) => p.category === slug), [productsList, slug]);
   const [sort, setSort] = React.useState<Sort>("default");
 
   const list = React.useMemo(() => {
@@ -99,7 +103,7 @@ function CategoryPage() {
       <section className="container-x pb-20">
         <h3 className="font-display text-2xl text-slate-brand mb-5">Explore Other Categories</h3>
         <div className="flex flex-wrap gap-2">
-          {categories.filter(x => x.slug !== c.slug).map((x) => (
+          {categoriesList.filter((x: any) => x.slug !== c.slug).map((x: any) => (
             <Link key={x.slug} to="/category/$slug" params={{ slug: x.slug }}
               className="px-4 py-2 rounded-full text-sm border border-subtle hover:border-[var(--gold)] hover:text-[var(--gold)] transition-all bg-white">
               {x.name}
