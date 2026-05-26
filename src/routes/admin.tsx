@@ -103,12 +103,11 @@ function ImageUploadField({
               </div>
               <div className="text-[10px] text-slate-400 truncate mt-0.5">{value}</div>
             </div>
-            <button 
-              type="button"
+            <span 
               className="text-[11px] font-bold text-slate-600 hover:text-[var(--gold)] bg-white border border-slate-200 hover:border-[var(--gold)] px-3 py-1.5 rounded-lg shadow-sm transition-all"
             >
               Change
-            </button>
+            </span>
           </div>
         ) : (
           <div className="flex items-center gap-3 py-2 px-3.5">
