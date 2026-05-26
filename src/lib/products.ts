@@ -200,7 +200,6 @@ export async function hydrateCatalog(force = false) {
       dynamicBanners.splice(0, dynamicBanners.length, ...dbBanners);
     }
 
-    lastHydrated = Date.now();
   } catch (err) {
     console.error("Storefront dynamic database hydration failed, using static fallbacks:", err);
   }
