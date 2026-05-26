@@ -54,9 +54,15 @@ function Hero() {
               {s.label && <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-xs md:text-sm mb-4">{s.label}</div>}
               {s.heading && <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>}
               {s.sub && <p className="mt-5 text-white/85 max-w-2xl mx-auto text-base md:text-lg">{s.sub}</p>}
-              <Link to={s.to} params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
-                Explore Collection <ChevronRight size={16}/>
-              </Link>
+              {s.slug ? (
+                <Link to="/category/$slug" params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
+                  Explore Collection <ChevronRight size={16}/>
+                </Link>
+              ) : (
+                <Link to="/" className="btn-gold mt-8 inline-flex">
+                  Explore Collection <ChevronRight size={16}/>
+                </Link>
+              )}
             </div>
           </div>
         </div>
