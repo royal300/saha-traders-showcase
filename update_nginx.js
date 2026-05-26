@@ -3,6 +3,17 @@ import { Client } from 'ssh2';
 const nginxConfig = `server {
     listen 80;
     server_name traders.royal300.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name traders.royal300.com;
+
+    ssl_certificate /etc/letsencrypt/live/traders.royal300.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/traders.royal300.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     root /var/www/saha_traders/dist/client;
 
