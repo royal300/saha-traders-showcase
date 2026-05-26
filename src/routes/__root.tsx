@@ -15,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import { CartProvider } from "@/lib/cart";
 import { CartDrawer } from "@/components/CartDrawer";
 import { FloatingCartBar } from "@/components/FloatingCartBar";
+import { Toaster } from "@/components/ui/sonner";
 import { trackVisitorFn } from "@/lib/server-functions";
 import { hydrateCatalog } from "@/lib/products";
 
@@ -143,6 +144,7 @@ function RootComponent() {
         </div>
         <CartDrawer />
         <FloatingCartBar />
+        <Toaster />
       </CartProvider>
     </QueryClientProvider>
   );

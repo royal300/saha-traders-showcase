@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import * as React from "react";
 import { 
   LayoutDashboard, Image as ImageIcon, Tags, ShoppingBag, 
@@ -6,7 +6,8 @@ import {
   CheckCircle, PlusCircle, ArrowRight, Settings, Globe, ShieldAlert,
   Loader2, Check
 } from "lucide-react";
-import { inr } from "@/lib/products";
+import { inr, hydrateCatalog } from "@/lib/products";
+import { toast } from "sonner";
 import { 
   getDashboardStatsFn,
   getBannersFn, saveBannerFn, deleteBannerFn,
@@ -51,14 +52,14 @@ function ImageUploadField({
         const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
         if (res.success && res.url) {
           onChange(res.url);
+          toast.success("Image uploaded successfully!");
         } else {
-          alert("Upload failed: " + (res.error || "Unknown error"));
+          toast.error("Upload failed: " + (res.error || "Unknown error"));
         }
       } catch (err: any) {
-        alert("Upload error: " + err.message);
+        toast.error("Upload error: " + err.message);
       } finally {
         setIsUploading(false);
-        // Reset input so same file can be re-selected
         if (fileInputRef.current) fileInputRef.current.value = "";
       }
     };
@@ -66,11 +67,11 @@ function ImageUploadField({
   };
 
   return (
-    <div className="space-y-1.5 text-left">
-      <div className="flex justify-between items-center mb-1">
-        <label className="block text-xs uppercase tracking-wider font-semibold text-slate-700">{label}</label>
+    <div className="space-y-1 text-left">
+      <div className="flex justify-between items-center mb-0.5">
+        <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-500">{label}</label>
         {recommendedSize && (
-          <span className="text-[10px] text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded">{recommendedSize}</span>
+          <span className="text-[9px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{recommendedSize}</span>
         )}
       </div>
       
@@ -79,49 +80,45 @@ function ImageUploadField({
         onClick={() => !isUploading && fileInputRef.current?.click()}
         className={`relative rounded-xl border-2 transition-all cursor-pointer group overflow-hidden ${
           value 
-            ? 'border-emerald-300 bg-emerald-50/30' 
-            : 'border-dashed border-slate-300 bg-slate-50 hover:border-[var(--gold)] hover:bg-amber-50/30'
+            ? 'border-slate-200 bg-slate-50/50 hover:border-[var(--gold)]' 
+            : 'border-dashed border-slate-300 bg-slate-50/50 hover:border-[var(--gold)] hover:bg-amber-50/20'
         }`}
-        style={{ minHeight: value ? '120px' : '90px' }}
       >
-        {value ? (
-          <>
+        {isUploading ? (
+          <div className="flex items-center justify-center gap-2.5 py-3 px-4">
+            <Loader2 size={16} className="animate-spin text-[var(--gold)]" />
+            <span className="text-xs font-semibold text-slate-500 animate-pulse">Uploading image...</span>
+          </div>
+        ) : value ? (
+          <div className="flex items-center gap-3.5 p-2">
             <img 
               src={value} 
               alt="Preview" 
-              className="w-full h-32 object-cover rounded-lg"
+              className="w-14 h-14 object-cover rounded-lg border border-slate-200 bg-white"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center rounded-lg">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow flex items-center gap-1.5">
-                <ImageIcon size={12} /> Change Image
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                <CheckCircle size={12} strokeWidth={2.5} /> Image Uploaded
               </div>
+              <div className="text-[10px] text-slate-400 truncate mt-0.5">{value}</div>
             </div>
-            <div className="absolute top-2 right-2 bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">✓ Uploaded</div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center gap-2 py-6 px-4 text-center">
-            {isUploading ? (
-              <>
-                <Loader2 size={22} className="animate-spin text-[var(--gold)]" />
-                <span className="text-xs font-semibold text-slate-500">Uploading...</span>
-              </>
-            ) : (
-              <>
-                <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-                  <ImageIcon size={18} className="text-slate-400" />
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-slate-600">{placeholder}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP supported</div>
-                </div>
-              </>
-            )}
+            <button 
+              type="button"
+              className="text-[11px] font-bold text-slate-600 hover:text-[var(--gold)] bg-white border border-slate-200 hover:border-[var(--gold)] px-3 py-1.5 rounded-lg shadow-sm transition-all"
+            >
+              Change
+            </button>
           </div>
-        )}
-        {isUploading && value && (
-          <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-lg">
-            <Loader2 size={22} className="animate-spin text-[var(--gold)]" />
+        ) : (
+          <div className="flex items-center gap-3 py-2 px-3.5">
+            <div className="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-amber-100/50 flex items-center justify-center transition-colors shrink-0">
+              <ImageIcon size={14} className="text-slate-400 group-hover:text-[var(--gold)]" />
+            </div>
+            <div className="text-left min-w-0">
+              <div className="text-xs font-semibold text-slate-600 group-hover:text-slate-800 transition-colors truncate">{placeholder}</div>
+              <div className="text-[9px] text-slate-400 mt-0.5">JPEG, PNG, WEBP supported</div>
+            </div>
           </div>
         )}
       </div>
@@ -153,6 +150,7 @@ function GalleryUploadField({
     setIsUploading(true);
     try {
       const newUrls = [...gallery];
+      let uploadCount = 0;
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const base64String = await new Promise<string>((resolve) => {
@@ -164,11 +162,15 @@ function GalleryUploadField({
         const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
         if (res.success && res.url) {
           newUrls.push(res.url);
+          uploadCount++;
         }
       }
       onChange(newUrls);
+      if (uploadCount > 0) {
+        toast.success(`Successfully uploaded ${uploadCount} gallery image(s)!`);
+      }
     } catch (err: any) {
-      alert("Error uploading gallery image: " + err.message);
+      toast.error("Error uploading gallery image: " + err.message);
     } finally {
       setIsUploading(false);
     }
@@ -232,6 +234,7 @@ function GalleryUploadField({
 }
 
 function AdminPage() {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<"dashboard" | "media" | "categories" | "products" | "customers" | "whatsapp">("dashboard");
   const [isLoading, setIsLoading] = React.useState(true);
@@ -336,10 +339,14 @@ function AdminPage() {
         const loaded = await getBannersFn();
         setBanners(loaded);
         setEditingBanner(null);
-        showFeedback("Banner slide saved successfully!");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Banner slide saved successfully!");
+      } else {
+        toast.error("Failed to save banner: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error saving banner: " + e.message);
+      toast.error("Error saving banner: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -353,10 +360,14 @@ function AdminPage() {
       if (res.success) {
         const loaded = await getBannersFn();
         setBanners(loaded);
-        showFeedback("Banner slide deleted.");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Banner slide deleted successfully.");
+      } else {
+        toast.error("Failed to delete banner: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error deleting banner: " + e.message);
+      toast.error("Error deleting banner: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -374,10 +385,14 @@ function AdminPage() {
         const loaded = await getCategoriesFn();
         setCategories(loaded);
         setEditingCategory(null);
-        showFeedback("Category saved successfully!");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Category saved successfully!");
+      } else {
+        toast.error("Failed to save category: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error saving category: " + e.message);
+      toast.error("Error saving category: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -394,10 +409,14 @@ function AdminPage() {
         // Refresh products since they cascade delete in DB
         const prod = await getProductsFn();
         setProducts(prod);
-        showFeedback("Category and associated products deleted.");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Category and all its products deleted successfully.");
+      } else {
+        toast.error("Failed to delete category: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error deleting category: " + e.message);
+      toast.error("Error deleting category: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -415,10 +434,14 @@ function AdminPage() {
         const loaded = await getProductsFn();
         setProducts(loaded);
         setEditingProduct(null);
-        showFeedback("Product saved successfully!");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Product saved successfully!");
+      } else {
+        toast.error("Failed to save product: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error saving product: " + e.message);
+      toast.error("Error saving product: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -432,10 +455,14 @@ function AdminPage() {
       if (res.success) {
         const loaded = await getProductsFn();
         setProducts(loaded);
-        showFeedback("Product deleted successfully.");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("Product deleted successfully.");
+      } else {
+        toast.error("Failed to delete product: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error deleting product: " + e.message);
+      toast.error("Error deleting product: " + e.message);
     } finally {
       setActionLoading(false);
     }
@@ -450,10 +477,14 @@ function AdminPage() {
     try {
       const res = await updateSettingFn({ key: "whatsapp_number", value: settings.whatsapp_number });
       if (res.success) {
-        showFeedback("WhatsApp settings updated globally!");
+        await hydrateCatalog(true);
+        router.invalidate();
+        toast.success("WhatsApp settings updated globally!");
+      } else {
+        toast.error("Failed to save settings: " + (res.error || "Unknown error"));
       }
     } catch (e: any) {
-      alert("Error saving settings: " + e.message);
+      toast.error("Error saving settings: " + e.message);
     } finally {
       setActionLoading(false);
     }
