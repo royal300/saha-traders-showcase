@@ -25,7 +25,6 @@ import {
   Eye,
   RefreshCw,
   Package,
-  Package,
   BarChart3,
   Menu,
 } from "lucide-react";
