@@ -1,12 +1,15 @@
 import * as React from "react";
 import { Link, useRouterState, useLoaderData } from "@tanstack/react-router";
 import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
-import { categories } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import logoPng from "@/logo.png";
 
 export function Navbar() {
-  const categoriesList = categories;
+  // Read categories from the root route's reactive loader data.
+  // This ensures the Navbar always reflects the live DB state after
+  // admin CRUD operations + router.invalidate().
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categoriesList: any[] = rootData?.categories ?? [];
 
   const [mobile, setMobile] = React.useState(false);
   const [catOpen, setCatOpen] = React.useState(false);

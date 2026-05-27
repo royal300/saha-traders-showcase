@@ -6,7 +6,7 @@ import {
   CheckCircle, PlusCircle, ArrowRight, Settings, Globe, ShieldAlert,
   Loader2, Check
 } from "lucide-react";
-import { inr, hydrateCatalog } from "@/lib/products";
+import { inr } from "@/lib/products";
 import { toast } from "sonner";
 import { 
   getDashboardStatsFn,
@@ -338,8 +338,7 @@ function AdminPage() {
         const loaded = await getBannersFn();
         setBanners(loaded);
         setEditingBanner(null);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Banner slide saved successfully!");
       } else {
         toast.error("Failed to save banner: " + (res.error || "Unknown error"));
@@ -359,8 +358,7 @@ function AdminPage() {
       if (res.success) {
         const loaded = await getBannersFn();
         setBanners(loaded);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Banner slide deleted successfully.");
       } else {
         toast.error("Failed to delete banner: " + (res.error || "Unknown error"));
@@ -384,8 +382,7 @@ function AdminPage() {
         const loaded = await getCategoriesFn();
         setCategories(loaded);
         setEditingCategory(null);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Category saved successfully!");
       } else {
         toast.error("Failed to save category: " + (res.error || "Unknown error"));
@@ -408,8 +405,7 @@ function AdminPage() {
         // Refresh products since they cascade delete in DB
         const prod = await getProductsFn();
         setProducts(prod);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Category and all its products deleted successfully.");
       } else {
         toast.error("Failed to delete category: " + (res.error || "Unknown error"));
@@ -433,8 +429,7 @@ function AdminPage() {
         const loaded = await getProductsFn();
         setProducts(loaded);
         setEditingProduct(null);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Product saved successfully!");
       } else {
         toast.error("Failed to save product: " + (res.error || "Unknown error"));
@@ -454,8 +449,7 @@ function AdminPage() {
       if (res.success) {
         const loaded = await getProductsFn();
         setProducts(loaded);
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("Product deleted successfully.");
       } else {
         toast.error("Failed to delete product: " + (res.error || "Unknown error"));
@@ -476,8 +470,7 @@ function AdminPage() {
     try {
       const res = await updateSettingFn({ key: "whatsapp_number", value: settings.whatsapp_number });
       if (res.success) {
-        await hydrateCatalog(true);
-        router.invalidate();
+        await router.invalidate();
         toast.success("WhatsApp settings updated globally!");
       } else {
         toast.error("Failed to save settings: " + (res.error || "Unknown error"));

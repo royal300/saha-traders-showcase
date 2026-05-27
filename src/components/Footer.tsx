@@ -1,9 +1,11 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLoaderData } from "@tanstack/react-router";
 import { Instagram, Facebook, MessageCircle, MapPin, Phone, Mail } from "lucide-react";
-import { categories } from "@/lib/products";
 import logoPng from "@/logo.png";
 
 export function Footer() {
+  const rootData = useLoaderData({ from: "__root__" }) as any;
+  const categories: any[] = rootData?.categories ?? [];
+
   return (
     <footer className="bg-slate-brand text-white/80 mt-0">
       <div className="container-x py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
