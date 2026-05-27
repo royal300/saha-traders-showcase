@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Award, Heart, Sparkles, Layers } from "lucide-react";
 import { ai, seedFrom } from "@/lib/images";
 import { SafeImage } from "@/components/SafeImage";
+import aboutImg from "@/about.png";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
@@ -18,7 +19,7 @@ function AboutPage() {
   return (
     <>
       <section className="relative h-[400px]">
-        <img src="/about-poster.jpg" className="absolute inset-0 w-full h-full object-cover" alt="Saha Marble & Tiles Poster"/>
+        <SafeImage src={ai("luxury modern showroom interior displaying premium tiles and bathroom fittings, elegant architecture, wide shot, photorealistic, 1920x1080", 1920, 1080, seedFrom("about-hero"))} className="absolute inset-0 w-full h-full object-cover" alt=""/>
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative container-x h-full flex flex-col items-center justify-center text-center text-white">
           <h1 className="font-display text-5xl md:text-6xl text-white">About Saha Marble & Tiles</h1>
@@ -35,7 +36,7 @@ function AboutPage() {
             <p>Our team is here to help you find exactly what suits your home, your project, and your budget. Walk in for a coffee and a chat about your renovation — we're always happy to help.</p>
           </div>
         </div>
-        <SafeImage src={ai("friendly professional store owner inside a premium tiles and sanitaryware showroom, high quality interior photography, 800x1000", 800, 1000, seedFrom("about-store"))} className="rounded-lg shadow-xl w-full aspect-[4/5] object-cover" alt="Our Showroom"/>
+        <img src={aboutImg} className="rounded-lg shadow-xl w-full aspect-[4/5] object-cover" alt="Our Showroom"/>
       </section>
 
       <section className="bg-slate-brand text-white py-16">
