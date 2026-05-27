@@ -25,9 +25,12 @@ import {
   Eye,
   RefreshCw,
   Package,
+  Package,
   BarChart3,
+  Menu,
 } from "lucide-react";
 import { inr } from "@/lib/products";
+import logoPng from "@/logo.png";
 import { toast } from "sonner";
 import {
   getDashboardStatsFn,
@@ -559,7 +562,7 @@ function DashboardTab({ stats }: { stats: any }) {
                     <td style={tdStyle}><span style={{ fontFamily: "monospace", fontSize: 12, color: C.muted }}>{o.mobile}</span></td>
                     <td style={{ ...tdStyle, maxWidth: 200 }}><span style={{ fontSize: 12, color: C.muted, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.address}</span></td>
                     <td style={tdStyle}><span style={{ fontSize: 12, color: C.muted }}>{new Date(o.created_at).toLocaleDateString("en-IN")}</span></td>
-                    <td style={tdStyle}><span style={{ fontWeight: 800, color: C.goldHover }}>{inr(o.total_price)}</span></td>
+                    <td style={tdStyle}><span className="price-inr" style={{ fontWeight: 800, color: C.goldHover }}>{inr(o.total_price)}</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -1175,8 +1178,8 @@ function ProductsTab({ products, categories, onReload }: { products: any[]; cate
               </span>
             </td>
             <td style={tdStyle}>
-              <div style={{ fontWeight: 800, color: C.text, fontSize: 13 }}>{inr(parseFloat(p.price) || 0)}</div>
-              {p.old_price && <div style={{ fontSize: 11, color: "#94a3b8", textDecoration: "line-through" }}>{inr(parseFloat(p.old_price))}</div>}
+              <div className="price-inr" style={{ fontWeight: 800, color: C.text, fontSize: 13 }}>{inr(parseFloat(p.price) || 0)}</div>
+              {p.old_price && <div className="price-inr" style={{ fontSize: 11, color: "#94a3b8", textDecoration: "line-through" }}>{inr(parseFloat(p.old_price))}</div>}
             </td>
             <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
               <div style={{ display: "flex", gap: 6 }}>
@@ -1252,7 +1255,7 @@ function CustomersTab({ customers }: { customers: any[] }) {
             <td style={tdStyle}><span style={{ fontWeight: 700, color: C.text }}>{c.name}</span></td>
             <td style={tdStyle}><span style={{ fontFamily: "monospace", fontSize: 12, color: C.muted }}>{c.mobile}</span></td>
             <td style={{ ...tdStyle, maxWidth: 220 }}><span style={{ fontSize: 12, color: C.muted, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.address}</span></td>
-            <td style={tdStyle}><span style={{ fontWeight: 800, color: C.goldHover }}>{inr(parseFloat(c.total_price) || 0)}</span></td>
+            <td style={tdStyle}><span className="price-inr" style={{ fontWeight: 800, color: C.goldHover }}>{inr(parseFloat(c.total_price) || 0)}</span></td>
             <td style={tdStyle}><span style={{ fontSize: 11, color: C.muted }}>{new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></td>
           </tr>
         ))}
@@ -1341,13 +1344,24 @@ const navItems = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
-function Sidebar({ activeTab, onTabChange, onLogout }: { activeTab: string; onTabChange: (t: string) => void; onLogout: () => void }) {
+function Sidebar({ activeTab, onTabChange, onLogout, isMobile, isOpen, onClose }: { activeTab: string; onTabChange: (t: string) => void; onLogout: () => void; isMobile?: boolean; isOpen?: boolean; onClose?: () => void; }) {
   return (
-    <aside style={{ width: 240, background: C.sidebar, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: C.sidebarBorder }}>
+    <>
+      {isMobile && isOpen && (
+        <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 40 }} />
+      )}
+      <aside style={{ 
+        width: 240, background: C.sidebar, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: C.sidebarBorder,
+        position: isMobile ? "fixed" : "relative",
+        top: 0, bottom: 0, left: 0,
+        zIndex: 50,
+        transform: isMobile ? (isOpen ? "translateX(0)" : "translateX(-100%)") : "none",
+        transition: "transform 0.3s ease"
+      }}>
       {/* Logo */}
       <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/src/logo.png" alt="Saha" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "white", padding: 2 }} />
+          <img src={logoPng} alt="Saha" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "white", padding: 2 }} />
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, letterSpacing: "0.04em" }}>SAHA MARBLE</div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Admin Panel</div>
@@ -1416,6 +1430,15 @@ function AdminPage() {
   const [activeTab, setActiveTab] = React.useState<string>("dashboard");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // All data lives here — each tab receives its slice + a reload callback
   const [stats, setStats] = React.useState<any>({ products: 0, categories: 0, customers: 0, visitors: 0, recentOrders: [] });
@@ -1492,15 +1515,27 @@ function AdminPage() {
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", background: C.bg }}>
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} />
+      <Sidebar 
+        activeTab={activeTab} 
+        onTabChange={(t) => { setActiveTab(t); setMobileMenuOpen(false); }} 
+        onLogout={handleLogout} 
+        isMobile={isMobile}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
 
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
         {/* Top bar */}
-        <header style={{ height: 60, background: "white", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
-          <div>
+        <header style={{ height: 60, background: "white", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px", flexShrink: 0, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {isMobile && (
+              <button onClick={() => setMobileMenuOpen(true)} style={{ background: "transparent", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 4 }}>
+                <Menu size={22} color={C.text} />
+              </button>
+            )}
             <h1 style={{ fontSize: 16, fontWeight: 800, color: C.text, margin: 0 }}>{tabTitles[activeTab]}</h1>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}

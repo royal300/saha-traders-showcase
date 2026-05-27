@@ -41,9 +41,9 @@ export function ProductCard({ p, idx = 0 }: { p: Product; idx?: number }) {
           ))}
         </div>
         <div className="flex items-baseline gap-2">
-          <span className="text-[var(--gold)] font-semibold text-lg">{inr(p.price)}</span>
+          <span className="text-[var(--gold)] font-semibold text-lg price-inr">{inr(p.price)}</span>
           {p.oldPrice && (
-            <span className="text-xs text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</span>
+            <span className="text-xs text-[var(--charcoal)]/50 line-through price-inr">{inr(p.oldPrice)}</span>
           )}
         </div>
         <button

@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Link, useRouterState, useLoaderData } from "@tanstack/react-router";
-import { Menu, X, ShoppingBag, ChevronDown } from "lucide-react";
+import { Link, useRouterState, useLoaderData, useNavigate } from "@tanstack/react-router";
+import { Menu, X, ShoppingBag, ChevronDown, Search } from "lucide-react";
 import { useCart } from "@/lib/cart";
+import { inr } from "@/lib/products";
 import logoPng from "@/logo.png";
 
 export function Navbar() {
@@ -10,11 +11,23 @@ export function Navbar() {
   // admin CRUD operations + router.invalidate().
   const rootData = useLoaderData({ from: "__root__" }) as any;
   const categoriesList: any[] = rootData?.categories ?? [];
+  const productsList: any[] = rootData?.products ?? [];
 
   const [mobile, setMobile] = React.useState(false);
   const [catOpen, setCatOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const { count, setOpen } = useCart();
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+
+  const searchResults = React.useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase();
+    return productsList
+      .filter((p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q))
+      .slice(0, 3);
+  }, [searchQuery, productsList]);
 
   const link = (to: string, label: string) => (
     <Link
@@ -72,6 +85,61 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <div className="relative">
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="relative text-white hover:text-[var(--gold)] transition-colors p-2"
+              aria-label="Search"
+            >
+              <Search size={22} />
+            </button>
+            {searchOpen && (
+              <div className="absolute right-0 top-full mt-2 w-[300px] md:w-[400px] bg-white rounded-lg shadow-2xl border border-subtle overflow-hidden">
+                <div className="p-3 border-b border-subtle flex items-center gap-2">
+                  <Search size={16} className="text-gray-400" />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full text-sm outline-none bg-transparent text-slate-brand"
+                  />
+                  <button onClick={() => { setSearchOpen(false); setSearchQuery(""); }} className="text-gray-400 hover:text-red-500">
+                    <X size={16} />
+                  </button>
+                </div>
+                {searchQuery.trim() && (
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {searchResults.length > 0 ? (
+                      <div className="flex flex-col">
+                        {searchResults.map((p) => (
+                          <div
+                            key={p.slug}
+                            onClick={() => {
+                              setSearchOpen(false);
+                              setSearchQuery("");
+                              navigate({ to: "/product/$slug", params: { slug: p.slug } });
+                            }}
+                            className="flex items-center gap-3 p-3 hover:bg-[var(--offwhite)] cursor-pointer transition-colors border-b border-subtle last:border-0"
+                          >
+                            <img src={p.image} alt={p.name} className="w-12 h-12 object-cover rounded bg-gray-100" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-slate-brand truncate">{p.name}</div>
+                              <div className="text-[10px] text-[var(--gold)] uppercase tracking-wider">{p.category}</div>
+                            </div>
+                            <div className="text-sm font-bold text-slate-brand price-inr">{inr(p.price)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-sm text-gray-500">No products found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setOpen(true)}
             className="relative text-white hover:text-[var(--gold)] transition-colors p-2"

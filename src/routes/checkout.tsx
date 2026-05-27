@@ -14,7 +14,7 @@ function CheckoutPage() {
   const rootData = useLoaderData({ from: "__root__" }) as any;
   const settings = rootData?.settings || globalSettings;
 
-  const { items, subtotal, clear } = useCart();
+  const { items, subtotal, clear, setQty } = useCart();
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
   const [form, setForm] = React.useState({ name: "", mobile: "", address: "" });
@@ -93,10 +93,14 @@ function CheckoutPage() {
               <div key={i.slug} className="flex gap-3 items-center text-sm">
                 <img src={i.image} alt="" className="w-14 h-14 object-cover rounded"/>
                 <div className="flex-1">
-                  <div className="font-medium text-slate-brand">{i.name}</div>
-                  <div className="text-[var(--charcoal)]/70 text-xs">Qty: {i.qty}</div>
+                  <div className="font-medium text-slate-brand leading-tight mb-1.5">{i.name}</div>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => setQty(i.slug, i.qty - 1)} className="w-6 h-6 flex items-center justify-center rounded border border-subtle bg-[var(--offwhite)] hover:border-[var(--gold)] transition-colors text-sm font-medium">-</button>
+                    <span className="text-xs font-semibold w-4 text-center">{i.qty}</span>
+                    <button type="button" onClick={() => setQty(i.slug, i.qty + 1)} className="w-6 h-6 flex items-center justify-center rounded border border-subtle bg-[var(--offwhite)] hover:border-[var(--gold)] transition-colors text-sm font-medium">+</button>
+                  </div>
                 </div>
-                <div className="text-[var(--gold)] font-semibold">{inr(i.price * i.qty)}</div>
+                <div className="text-[var(--gold)] font-semibold price-inr">{inr(i.price * i.qty)}</div>
               </div>
             ))}
             <div className="border-t border-subtle pt-3 space-y-1 text-sm">

@@ -278,4 +278,12 @@
   .mask-gradient::after {
     right: 0; background: linear-gradient(to left, #ffffff, transparent);
   }
+
+  /* ── Price / currency typography ───────────────────────────────────────── */
+  /* Applied to any element that renders inr() output so ₹ reads cleanly    */
+  .price-inr {
+    font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
 }
