@@ -5,6 +5,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -131,11 +132,25 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAdmin = pathname === "/admin";
 
   React.useEffect(() => {
-    // Log unique visitor IP securely on mount
-    trackVisitorFn().catch(err => console.error("Error tracking visitor:", err));
-  }, []);
+    if (!isAdmin) {
+      // Log unique visitor IP securely on mount (frontend only)
+      trackVisitorFn().catch(err => console.error("Error tracking visitor:", err));
+    }
+  }, [isAdmin]);
+
+  // Admin gets a completely standalone layout — no Navbar, Footer, or cart UI
+  if (isAdmin) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+        <Toaster />
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

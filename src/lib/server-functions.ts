@@ -90,7 +90,8 @@ export const saveBannerFn = createServerFn({ method: "POST" })
   });
 
 export const deleteBannerFn = createServerFn({ method: "POST" })
-  .handler(async ({ id }: { id: number }) => {
+  .handler(async ({ data }: { data: { id: number } }) => {
+    const { id } = data;
     try {
       await pool.query("DELETE FROM media WHERE id = ?", [id]);
       return { success: true };
@@ -138,7 +139,8 @@ export const saveCategoryFn = createServerFn({ method: "POST" })
   });
 
 export const deleteCategoryFn = createServerFn({ method: "POST" })
-  .handler(async ({ id }: { id: number }) => {
+  .handler(async ({ data }: { data: { id: number } }) => {
+    const { id } = data;
     try {
       // First get the slug so we can also delete products in this category
       const [rows]: any = await pool.query("SELECT slug FROM categories WHERE id = ?", [id]);
@@ -229,7 +231,8 @@ export const saveProductFn = createServerFn({ method: "POST" })
   });
 
 export const deleteProductFn = createServerFn({ method: "POST" })
-  .handler(async ({ id }: { id: string }) => {
+  .handler(async ({ data }: { data: { id: string } }) => {
+    const { id } = data;
     try {
       await pool.query("DELETE FROM products WHERE id = ?", [id]);
       return { success: true };

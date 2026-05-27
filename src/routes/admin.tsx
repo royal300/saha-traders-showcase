@@ -1,55 +1,167 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import * as React from "react";
-import { 
-  LayoutDashboard, Image as ImageIcon, Tags, ShoppingBag, 
-  Users, Phone, LogOut, Plus, Edit, Trash2, Download, 
-  CheckCircle, PlusCircle, ArrowRight, Settings, Globe, ShieldAlert,
-  Loader2, Check
+import {
+  LayoutDashboard,
+  Image as ImageIcon,
+  Tags,
+  ShoppingBag,
+  Users,
+  Phone,
+  LogOut,
+  Plus,
+  Edit,
+  Trash2,
+  Download,
+  CheckCircle,
+  PlusCircle,
+  Settings,
+  Globe,
+  ShieldAlert,
+  Loader2,
+  Check,
+  X,
+  AlertTriangle,
+  TrendingUp,
+  Eye,
+  RefreshCw,
+  Package,
+  BarChart3,
 } from "lucide-react";
 import { inr } from "@/lib/products";
 import { toast } from "sonner";
-import { 
+import {
   getDashboardStatsFn,
-  getBannersFn, saveBannerFn, deleteBannerFn,
-  getCategoriesFn, saveCategoryFn, deleteCategoryFn,
-  getProductsFn, saveProductFn, deleteProductFn,
+  getBannersFn,
+  saveBannerFn,
+  deleteBannerFn,
+  getCategoriesFn,
+  saveCategoryFn,
+  deleteCategoryFn,
+  getProductsFn,
+  saveProductFn,
+  deleteProductFn,
   getCustomersFn,
-  getSettingsFn, updateSettingFn,
-  uploadImageFn
+  getSettingsFn,
+  updateSettingFn,
+  uploadImageFn,
 } from "@/lib/server-functions";
-
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Panel — Saha Marble & Tiles" }] }),
   component: AdminPage,
 });
 
-function ImageUploadField({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder = "Click to upload image...", 
-  recommendedSize 
-}: { 
-  label: string; 
-  value: string; 
-  onChange: (url: string) => void; 
-  placeholder?: string; 
-  recommendedSize?: string; 
-}) {
-  const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+// ─────────────────────────────────────────────────────────────────────────────
+// DESIGN TOKENS (inline — admin is fully self-contained)
+// ─────────────────────────────────────────────────────────────────────────────
+const C = {
+  sidebar: "#0f172a",
+  sidebarBorder: "rgba(255,255,255,0.06)",
+  gold: "#d4a017",
+  goldHover: "#b8860b",
+  bg: "#f1f5f9",
+  card: "#ffffff",
+  border: "#e2e8f0",
+  text: "#0f172a",
+  muted: "#64748b",
+  danger: "#ef4444",
+  success: "#10b981",
+};
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "10px 14px",
+  borderRadius: 10,
+  border: `1.5px solid ${C.border}`,
+  fontSize: 13,
+  color: C.text,
+  background: "#f8fafc",
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+};
+
+const btnGold: React.CSSProperties = {
+  background: C.gold,
+  color: "#0f172a",
+  border: "none",
+  borderRadius: 10,
+  padding: "10px 20px",
+  fontSize: 12,
+  fontWeight: 700,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 6,
+  letterSpacing: "0.03em",
+  transition: "all 0.15s",
+};
+
+const btnDanger: React.CSSProperties = {
+  background: "#fef2f2",
+  color: C.danger,
+  border: `1px solid #fecaca`,
+  borderRadius: 8,
+  padding: "6px 12px",
+  fontSize: 12,
+  fontWeight: 600,
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 5,
+  transition: "all 0.15s",
+};
+
+const btnOutline: React.CSSProperties = {
+  background: "white",
+  color: C.muted,
+  border: `1.5px solid ${C.border}`,
+  borderRadius: 10,
+  padding: "10px 20px",
+  fontSize: 12,
+  fontWeight: 600,
+  cursor: "pointer",
+  transition: "all 0.15s",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontSize: 11,
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: C.muted,
+  display: "block",
+  marginBottom: 6,
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE UPLOAD FIELD
+// ─────────────────────────────────────────────────────────────────────────────
+function ImageUploadField({
+  label,
+  value,
+  onChange,
+  placeholder = "Click to upload image",
+  recommendedSize,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  placeholder?: string;
+  recommendedSize?: string;
+}) {
+  const [uploading, setUploading] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    setIsUploading(true);
+    setUploading(true);
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const base64String = (reader.result as string).split(",")[1];
+      const base64Data = (reader.result as string).split(",")[1];
       try {
-        const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
+        const res = await uploadImageFn({ data: { fileName: file.name, base64Data } });
         if (res.success && res.url) {
           onChange(res.url);
           toast.success("Image uploaded successfully!");
@@ -59,192 +171,1253 @@ function ImageUploadField({
       } catch (err: any) {
         toast.error("Upload error: " + err.message);
       } finally {
-        setIsUploading(false);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        setUploading(false);
+        if (inputRef.current) inputRef.current.value = "";
       }
     };
     reader.readAsDataURL(file);
   };
 
   return (
-    <div className="space-y-1 text-left">
-      <div className="flex justify-between items-center mb-0.5">
-        <label className="block text-[10px] uppercase tracking-wider font-semibold text-slate-500">{label}</label>
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+        <label style={labelStyle}>{label}</label>
         {recommendedSize && (
-          <span className="text-[9px] text-slate-400 font-mono bg-slate-100 px-1.5 py-0.5 rounded">{recommendedSize}</span>
+          <span style={{ fontSize: 9, color: "#94a3b8", fontFamily: "monospace", background: "#f1f5f9", padding: "2px 8px", borderRadius: 4 }}>
+            {recommendedSize}
+          </span>
         )}
       </div>
-      
-      {/* Clickable upload area */}
       <div
-        onClick={() => !isUploading && fileInputRef.current?.click()}
-        className={`relative rounded-xl border-2 transition-all cursor-pointer group overflow-hidden ${
-          value 
-            ? 'border-slate-200 bg-slate-50/50 hover:border-[var(--gold)]' 
-            : 'border-dashed border-slate-300 bg-slate-50/50 hover:border-[var(--gold)] hover:bg-amber-50/20'
-        }`}
+        onClick={() => !uploading && inputRef.current?.click()}
+        style={{
+          border: value ? `1.5px solid ${C.border}` : "2px dashed #cbd5e1",
+          borderRadius: 12,
+          background: "#f8fafc",
+          cursor: uploading ? "wait" : "pointer",
+          overflow: "hidden",
+          transition: "border-color 0.15s",
+        }}
       >
-        {isUploading ? (
-          <div className="flex items-center justify-center gap-2.5 py-3 px-4">
-            <Loader2 size={16} className="animate-spin text-[var(--gold)]" />
-            <span className="text-xs font-semibold text-slate-500 animate-pulse">Uploading image...</span>
+        {uploading ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 16px" }}>
+            <Loader2 size={15} style={{ animation: "spin 1s linear infinite", color: C.gold }} />
+            <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>Uploading image...</span>
           </div>
         ) : value ? (
-          <div className="flex items-center gap-3.5 p-2">
-            <img 
-              src={value} 
-              alt="Preview" 
-              className="w-14 h-14 object-cover rounded-lg border border-slate-200 bg-white"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: 10 }}>
+            <img
+              src={value}
+              alt="Preview"
+              style={{ width: 54, height: 54, objectFit: "cover", borderRadius: 8, border: `1px solid ${C.border}` }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                <CheckCircle size={12} strokeWidth={2.5} /> Image Uploaded
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.success, display: "flex", alignItems: "center", gap: 4 }}>
+                <CheckCircle size={11} /> Image Uploaded
               </div>
-              <div className="text-[10px] text-slate-400 truncate mt-0.5">{value}</div>
+              <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 3, wordBreak: "break-all" }}>
+                {value.split("/").pop()}
+              </div>
             </div>
-            <span 
-              className="text-[11px] font-bold text-slate-600 hover:text-[var(--gold)] bg-white border border-slate-200 hover:border-[var(--gold)] px-3 py-1.5 rounded-lg shadow-sm transition-all"
-            >
+            <span style={{ fontSize: 11, fontWeight: 600, color: C.muted, background: "white", border: `1px solid ${C.border}`, padding: "5px 12px", borderRadius: 8, flexShrink: 0 }}>
               Change
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 py-2 px-3.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 group-hover:bg-amber-100/50 flex items-center justify-center transition-colors shrink-0">
-              <ImageIcon size={14} className="text-slate-400 group-hover:text-[var(--gold)]" />
+          <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px" }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <ImageIcon size={15} color="#94a3b8" />
             </div>
-            <div className="text-left min-w-0">
-              <div className="text-xs font-semibold text-slate-600 group-hover:text-slate-800 transition-colors truncate">{placeholder}</div>
-              <div className="text-[9px] text-slate-400 mt-0.5">JPEG, PNG, WEBP supported</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "#475569" }}>{placeholder}</div>
+              <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>JPEG, PNG, WEBP</div>
             </div>
           </div>
         )}
       </div>
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        accept="image/jpeg,image/jpg,image/png,image/webp" 
-        className="hidden" 
-      />
+      <input type="file" ref={inputRef} onChange={handleFile} accept="image/jpeg,image/jpg,image/png,image/webp" style={{ display: "none" }} />
     </div>
   );
 }
 
-function GalleryUploadField({ 
-  gallery, 
-  onChange 
-}: { 
-  gallery: string[]; 
-  onChange: (newGallery: string[]) => void; 
-}) {
-  const [isUploading, setIsUploading] = React.useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+// ─────────────────────────────────────────────────────────────────────────────
+// GALLERY UPLOAD
+// ─────────────────────────────────────────────────────────────────────────────
+function GalleryUpload({ gallery, onChange }: { gallery: string[]; onChange: (g: string[]) => void }) {
+  const [uploading, setUploading] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const handleAddFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    try {
-      const newUrls = [...gallery];
-      let uploadCount = 0;
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const base64String = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
-          reader.readAsDataURL(file);
-        });
-        
-        const res = await uploadImageFn({ data: { fileName: file.name, base64Data: base64String } });
-        if (res.success && res.url) {
-          newUrls.push(res.url);
-          uploadCount++;
-        }
-      }
-      onChange(newUrls);
-      if (uploadCount > 0) {
-        toast.success(`Successfully uploaded ${uploadCount} gallery image(s)!`);
-      }
-    } catch (err: any) {
-      toast.error("Error uploading gallery image: " + err.message);
-    } finally {
-      setIsUploading(false);
+    if (!files || !files.length) return;
+    setUploading(true);
+    const newUrls = [...gallery];
+    let added = 0;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const b64 = await new Promise<string>((res) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res((reader.result as string).split(",")[1]);
+        reader.readAsDataURL(file);
+      });
+      const result = await uploadImageFn({ data: { fileName: file.name, base64Data: b64 } });
+      if (result.success && result.url) { newUrls.push(result.url); added++; }
     }
-  };
-
-  const handleRemoveImage = (indexToRemove: number) => {
-    onChange(gallery.filter((_, idx) => idx !== indexToRemove));
+    onChange(newUrls);
+    setUploading(false);
+    if (added > 0) toast.success(`${added} gallery image(s) uploaded!`);
   };
 
   return (
-    <div className="space-y-2 text-left">
-      <div className="flex justify-between items-center border-b border-subtle pb-2">
-        <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)]">Product Gallery Showcase Images</label>
-        <span className="text-[10px] text-[var(--charcoal)]/40 font-mono">Recommend: 800x800 px</span>
-      </div>
-      
-      <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
+    <div>
+      <label style={labelStyle}>Gallery Images</label>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(76px, 1fr))", gap: 8 }}>
         {gallery.map((url, idx) => (
-          <div key={idx} className="aspect-square rounded-lg border border-subtle bg-slate-50 relative group overflow-hidden">
-            <img src={url} alt="" className="w-full h-full object-cover" />
+          <div key={idx} style={{ aspectRatio: "1", position: "relative", borderRadius: 8, overflow: "hidden", border: `1px solid ${C.border}` }}>
+            <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
             <button
               type="button"
-              onClick={() => handleRemoveImage(idx)}
-              className="absolute inset-0 bg-red-600/80 text-white flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer text-xs font-bold"
-            >
-              Remove
-            </button>
+              onClick={() => onChange(gallery.filter((_, i) => i !== idx))}
+              style={{ position: "absolute", inset: 0, background: "rgba(239,68,68,0.85)", color: "white", border: "none", cursor: "pointer", opacity: 0, transition: "0.2s", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "0")}
+            >✕ Remove</button>
           </div>
         ))}
-        
         <button
           type="button"
-          disabled={isUploading}
-          onClick={() => fileInputRef.current?.click()}
-          className="aspect-square rounded-lg border-2 border-dashed border-slate-brand hover:border-slate-800 bg-slate-50 hover:bg-slate-100 flex flex-col items-center justify-center gap-1.5 transition-all text-slate-500 hover:text-slate-800 cursor-pointer"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          style={{ aspectRatio: "1", border: "2px dashed #cbd5e1", borderRadius: 8, background: "#f8fafc", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, color: "#94a3b8", minHeight: 76 }}
         >
-          {isUploading ? (
-            <>
-              <Loader2 size={18} className="animate-spin text-slate-brand" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Uploading...</span>
-            </>
-          ) : (
-            <>
-              <PlusCircle size={20} className="text-slate-brand" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Add Image</span>
-            </>
-          )}
+          {uploading
+            ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+            : <><PlusCircle size={18} /><span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase" }}>Add</span></>
+          }
         </button>
       </div>
-      
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleAddFile}
-        accept="image/*"
-        multiple
-        className="hidden"
-      />
+      <input type="file" ref={inputRef} onChange={handleFiles} accept="image/*" multiple style={{ display: "none" }} />
     </div>
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CONFIRM DELETE DIALOG
+// ─────────────────────────────────────────────────────────────────────────────
+function ConfirmDelete({
+  message,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading?: boolean;
+}) {
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}>
+      <div style={{ background: "white", borderRadius: 18, padding: "28px 28px 24px", maxWidth: 420, width: "90%", boxShadow: "0 25px 60px rgba(0,0,0,0.25)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 18 }}>
+          <div style={{ width: 42, height: 42, borderRadius: 12, background: "#fef2f2", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} color={C.danger} />
+          </div>
+          <div>
+            <h3 style={{ fontWeight: 800, fontSize: 15, color: C.text, margin: "0 0 6px" }}>Confirm Delete</h3>
+            <p style={{ fontSize: 13, color: C.muted, margin: 0, lineHeight: 1.6 }}>{message}</p>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+          <button onClick={onCancel} disabled={loading} style={{ ...btnOutline, padding: "9px 18px" }}>Cancel</button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            style={{ background: C.danger, color: "white", border: "none", borderRadius: 10, padding: "9px 20px", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}
+          >
+            {loading ? <Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> : <Trash2 size={13} />}
+            {loading ? "Deleting..." : "Yes, Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL WRAPPER
+// ─────────────────────────────────────────────────────────────────────────────
+function Modal({ title, onClose, children, width = 640 }: { title: string; onClose: () => void; children: React.ReactNode; width?: number }) {
+  return (
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 500, display: "flex", alignItems: "flex-start", justifyContent: "center", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", overflowY: "auto", padding: "32px 16px" }}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div style={{ background: "white", borderRadius: 20, width: "100%", maxWidth: width, boxShadow: "0 30px 80px rgba(0,0,0,0.3)", marginBottom: 32 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 24px", borderBottom: `1px solid ${C.border}` }}>
+          <h3 style={{ fontWeight: 800, fontSize: 16, color: C.text, margin: 0 }}>{title}</h3>
+          <button
+            onClick={onClose}
+            style={{ width: 32, height: 32, borderRadius: "50%", border: "none", background: "#f1f5f9", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.muted }}
+          >
+            <X size={15} />
+          </button>
+        </div>
+        <div style={{ padding: "24px" }}>{children}</div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SECTION HEADER (consistent heading + subtitle + action button)
+// ─────────────────────────────────────────────────────────────────────────────
+function SectionHeader({ title, subtitle, action }: { title: string; subtitle: string; action?: React.ReactNode }) {
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 24 }}>
+      <div>
+        <h2 style={{ fontWeight: 800, fontSize: 20, color: C.text, margin: "0 0 4px" }}>{title}</h2>
+        <p style={{ fontSize: 13, color: C.muted, margin: 0 }}>{subtitle}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// STAT CARD
+// ─────────────────────────────────────────────────────────────────────────────
+function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: any; color: string }) {
+  return (
+    <div style={{ background: "white", borderRadius: 16, padding: "20px 24px", border: `1px solid ${C.border}`, boxShadow: "0 1px 4px rgba(0,0,0,0.05)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div>
+        <div style={{ fontSize: 28, fontWeight: 900, color: C.text, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: "0.07em", marginTop: 6 }}>{label}</div>
+      </div>
+      <div style={{ width: 48, height: 48, borderRadius: 14, background: color, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Icon size={22} color="white" />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA TABLE WRAPPER
+// ─────────────────────────────────────────────────────────────────────────────
+function DataTable({ headers, children, empty }: { headers: string[]; children: React.ReactNode; empty?: boolean }) {
+  return (
+    <div style={{ background: "white", borderRadius: 16, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: "#f8fafc", borderBottom: `1px solid ${C.border}` }}>
+              {headers.map((h) => (
+                <th key={h} style={{ padding: "12px 18px", textAlign: "left", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: C.muted, whiteSpace: "nowrap" }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {empty ? (
+              <tr>
+                <td colSpan={headers.length} style={{ padding: "48px 18px", textAlign: "center", color: C.muted, fontSize: 13 }}>
+                  No records found.
+                </td>
+              </tr>
+            ) : children}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TABLE ROW BASE STYLES
+// ─────────────────────────────────────────────────────────────────────────────
+const tdStyle: React.CSSProperties = { padding: "13px 18px", borderBottom: `1px solid #f1f5f9`, verticalAlign: "middle" };
+const actionBtnStyle: React.CSSProperties = { width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "white", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGIN PAGE
+// ─────────────────────────────────────────────────────────────────────────────
+function LoginPage({ onLogin }: { onLogin: () => void }) {
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    setTimeout(() => {
+      if (username === "admin" && password === "admin123") {
+        sessionStorage.setItem("saha_admin_auth", "true");
+        onLogin();
+      } else {
+        setError("Invalid credentials. Please try again.");
+        setLoading(false);
+      }
+    }, 600);
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f172a 0%, #1a2744 50%, #0f172a 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "system-ui, -apple-system, sans-serif" }}>
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+        <div style={{ position: "absolute", top: "20%", left: "15%", width: 400, height: 400, borderRadius: "50%", background: `${C.gold}15`, filter: "blur(80px)" }} />
+        <div style={{ position: "absolute", bottom: "20%", right: "15%", width: 300, height: 300, borderRadius: "50%", background: "rgba(99,102,241,0.1)", filter: "blur(80px)" }} />
+      </div>
+      <div style={{ width: "100%", maxWidth: 420, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 24, padding: "40px 36px", backdropFilter: "blur(20px)", boxShadow: "0 30px 80px rgba(0,0,0,0.4)", position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: `${C.gold}20`, border: `1.5px solid ${C.gold}40`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Settings size={26} color={C.gold} />
+          </div>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "white", margin: "0 0 6px" }}>Admin Control Panel</h1>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", margin: 0, letterSpacing: "0.08em", textTransform: "uppercase" }}>Saha Marble & Tiles</p>
+        </div>
+
+        {error && (
+          <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 10, padding: "12px 14px", marginBottom: 20, display: "flex", alignItems: "center", gap: 10 }}>
+            <ShieldAlert size={15} color="#f87171" />
+            <span style={{ fontSize: 12, color: "#f87171", fontWeight: 600 }}>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={{ ...labelStyle, color: "rgba(255,255,255,0.5)", marginBottom: 8 }}>Username</label>
+            <input
+              required
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="admin"
+              style={{ ...inputStyle, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "white" }}
+            />
+          </div>
+          <div>
+            <label style={{ ...labelStyle, color: "rgba(255,255,255,0.5)", marginBottom: 8 }}>Password</label>
+            <input
+              required
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{ ...inputStyle, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "white" }}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{ ...btnGold, justifyContent: "center", padding: "14px", fontSize: 13, borderRadius: 12, marginTop: 8 }}
+          >
+            {loading ? <><Loader2 size={15} style={{ animation: "spin 1s linear infinite" }} /> Verifying...</> : "Authorize Access"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DASHBOARD TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function DashboardTab({ stats }: { stats: any }) {
+  return (
+    <div>
+      <SectionHeader title="Dashboard Overview" subtitle="Real-time analytics and store performance at a glance." />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 28 }}>
+        <StatCard label="Total Products" value={stats.products ?? 0} icon={ShoppingBag} color="#6366f1" />
+        <StatCard label="Categories" value={stats.categories ?? 0} icon={Tags} color={C.goldHover} />
+        <StatCard label="Total Orders" value={stats.customers ?? 0} icon={Users} color="#10b981" />
+        <StatCard label="Unique Visitors" value={stats.visitors ?? 0} icon={BarChart3} color="#f59e0b" />
+      </div>
+
+      {/* Recent Orders */}
+      <div style={{ background: "white", borderRadius: 16, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <h3 style={{ fontWeight: 800, fontSize: 15, color: C.text, margin: 0 }}>Recent Orders</h3>
+        </div>
+        {(!stats.recentOrders || stats.recentOrders.length === 0) ? (
+          <div style={{ padding: "48px 24px", textAlign: "center", color: C.muted, fontSize: 13 }}>No orders yet.</div>
+        ) : (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: "#f8fafc", borderBottom: `1px solid ${C.border}` }}>
+                  {["Customer", "Mobile", "Address", "Date", "Total"].map((h) => (
+                    <th key={h} style={{ padding: "11px 18px", textAlign: "left", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: C.muted }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {stats.recentOrders.map((o: any) => (
+                  <tr key={o.id} style={{ borderBottom: `1px solid #f1f5f9` }}>
+                    <td style={tdStyle}><span style={{ fontWeight: 700, color: C.text }}>{o.name}</span></td>
+                    <td style={tdStyle}><span style={{ fontFamily: "monospace", fontSize: 12, color: C.muted }}>{o.mobile}</span></td>
+                    <td style={{ ...tdStyle, maxWidth: 200 }}><span style={{ fontSize: 12, color: C.muted, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{o.address}</span></td>
+                    <td style={tdStyle}><span style={{ fontSize: 12, color: C.muted }}>{new Date(o.created_at).toLocaleDateString("en-IN")}</span></td>
+                    <td style={tdStyle}><span style={{ fontWeight: 800, color: C.goldHover }}>{inr(o.total_price)}</span></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MEDIA TAB (Banners / Slideshow)
+// ─────────────────────────────────────────────────────────────────────────────
+function MediaTab({ banners, onReload }: { banners: any[]; onReload: () => Promise<void> }) {
+  const [editing, setEditing] = React.useState<any>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<any>(null);
+  const [deleting, setDeleting] = React.useState(false);
+
+  const emptyForm = { image: "", heading: "", sub: "", label: "", slug: "", display_order: 1 };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await saveBannerFn({ data: editing });
+      if (res.success) {
+        toast.success(editing.id ? "Banner updated!" : "Banner added!");
+        setEditing(null);
+        await onReload();
+      } else {
+        toast.error("Failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      // FIXED: use { data: { id } } pattern to match server function signature
+      const res = await deleteBannerFn({ data: { id: deleteTarget.id } });
+      if (res.success) {
+        toast.success("Banner deleted successfully.");
+        setDeleteTarget(null);
+        await onReload();
+      } else {
+        toast.error("Delete failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div>
+      <SectionHeader
+        title="Media Manager"
+        subtitle="Manage your homepage slideshow banners."
+        action={
+          <button onClick={() => setEditing({ ...emptyForm })} style={btnGold}>
+            <Plus size={14} /> Add Banner
+          </button>
+        }
+      />
+
+      {editing && (
+        <Modal title={editing.id ? "Edit Banner" : "Add New Banner"} onClose={() => setEditing(null)} width={680}>
+          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <ImageUploadField label="Banner Image *" value={editing.image} onChange={(u) => setEditing({ ...editing, image: u })} recommendedSize="1920×800 px" placeholder="Upload banner slide image" />
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <label style={labelStyle}>Heading</label>
+                <input style={inputStyle} type="text" value={editing.heading} onChange={(e) => setEditing({ ...editing, heading: e.target.value })} placeholder="e.g. Premium Floor Tiles" />
+              </div>
+              <div>
+                <label style={labelStyle}>Mini Tag / Label</label>
+                <input style={inputStyle} type="text" value={editing.label} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="e.g. Floor & Wall Tiles" />
+              </div>
+              <div>
+                <label style={labelStyle}>Subtitle</label>
+                <input style={inputStyle} type="text" value={editing.sub} onChange={(e) => setEditing({ ...editing, sub: e.target.value })} placeholder="e.g. Crafted for elegance..." />
+              </div>
+              <div>
+                <label style={labelStyle}>Link to Category Slug</label>
+                <input style={inputStyle} type="text" value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} placeholder="e.g. floor-tiles" />
+              </div>
+              <div>
+                <label style={labelStyle}>Display Order</label>
+                <input style={inputStyle} type="number" value={editing.display_order} onChange={(e) => setEditing({ ...editing, display_order: parseInt(e.target.value) || 1 })} min={1} />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
+              <button type="button" onClick={() => setEditing(null)} style={btnOutline}>Cancel</button>
+              <button type="submit" disabled={saving || !editing.image} style={btnGold}>
+                {saving ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Saving...</> : <><Check size={13} /> Save Banner</>}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <ConfirmDelete
+          message={`Delete the banner "${deleteTarget.heading || deleteTarget.label || "Image Slide"}"? This cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={deleting}
+        />
+      )}
+
+      {banners.length === 0 ? (
+        <div style={{ background: "white", borderRadius: 16, border: `1px solid ${C.border}`, padding: "64px 24px", textAlign: "center", color: C.muted }}>
+          <ImageIcon size={36} color="#cbd5e1" style={{ marginBottom: 12 }} />
+          <p style={{ margin: 0, fontSize: 13 }}>No banners yet. Click "Add Banner" to create your first slide.</p>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
+          {banners.map((ban: any) => (
+            <div key={ban.id} style={{ background: "white", borderRadius: 16, border: `1px solid ${C.border}`, overflow: "hidden", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+              <div style={{ aspectRatio: "16/7", overflow: "hidden", background: "#f1f5f9", position: "relative" }}>
+                <img src={ban.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ position: "absolute", top: 8, right: 8, background: "rgba(0,0,0,0.6)", color: "white", fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 6, letterSpacing: "0.05em" }}>
+                  ORDER {ban.display_order}
+                </div>
+              </div>
+              <div style={{ padding: "14px 16px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: C.gold, textTransform: "uppercase", letterSpacing: "0.08em" }}>{ban.label || "No Tag"}</div>
+                <div style={{ fontWeight: 700, fontSize: 14, color: C.text, marginTop: 3, marginBottom: 4 }}>{ban.heading || "Image-Only Slide"}</div>
+                <div style={{ fontSize: 12, color: C.muted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{ban.sub || "Background image slide"}</div>
+                <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+                  <button onClick={() => setEditing({ ...ban })} style={{ ...actionBtnStyle, color: "#6366f1" }} title="Edit">
+                    <Edit size={13} />
+                  </button>
+                  <button onClick={() => setDeleteTarget(ban)} style={{ ...actionBtnStyle, color: C.danger, borderColor: "#fecaca" }} title="Delete">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CATEGORIES TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function CategoriesTab({ categories, onReload }: { categories: any[]; onReload: () => Promise<void> }) {
+  const [editing, setEditing] = React.useState<any>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<any>(null);
+  const [deleting, setDeleting] = React.useState(false);
+
+  const emptyForm = { name: "", slug: "", image: "", banner: "", blurb: "", is_featured: 1 };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing.image) { toast.error("Please upload a category thumbnail image."); return; }
+    setSaving(true);
+    try {
+      const res = await saveCategoryFn({ data: editing });
+      if (res.success) {
+        toast.success(editing.id ? "Category updated!" : "Category created!");
+        setEditing(null);
+        await onReload();
+      } else {
+        toast.error("Failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      // FIXED: use { data: { id } } pattern to match server function signature
+      const res = await deleteCategoryFn({ data: { id: deleteTarget.id } });
+      if (res.success) {
+        toast.success("Category and its products deleted.");
+        setDeleteTarget(null);
+        await onReload();
+      } else {
+        toast.error("Delete failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  return (
+    <div>
+      <SectionHeader
+        title="Category Manager"
+        subtitle="Create and manage your product categories. Changes reflect instantly on the storefront."
+        action={
+          <button onClick={() => setEditing({ ...emptyForm })} style={btnGold}>
+            <Plus size={14} /> Add Category
+          </button>
+        }
+      />
+
+      {editing && (
+        <Modal title={editing.id ? `Edit: ${editing.name}` : "Add New Category"} onClose={() => setEditing(null)} width={700}>
+          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+              {/* Left column */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <div>
+                  <label style={labelStyle}>Category Name *</label>
+                  <input
+                    required
+                    style={inputStyle}
+                    type="text"
+                    value={editing.name}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+                      setEditing({ ...editing, name, slug });
+                    }}
+                    placeholder="e.g. Vitrified Tiles"
+                    autoFocus
+                  />
+                  {editing.slug && (
+                    <div style={{ fontSize: 10, color: "#94a3b8", fontFamily: "monospace", marginTop: 5 }}>
+                      URL: /category/{editing.slug}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label style={labelStyle}>Short Description</label>
+                  <textarea
+                    style={{ ...inputStyle, resize: "vertical", minHeight: 80 }}
+                    value={editing.blurb}
+                    onChange={(e) => setEditing({ ...editing, blurb: e.target.value })}
+                    placeholder="Brief category description shown on category page..."
+                  />
+                </div>
+                {/* Featured toggle */}
+                <div
+                  onClick={() => setEditing({ ...editing, is_featured: editing.is_featured === 1 ? 0 : 1 })}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, border: `2px solid ${editing.is_featured === 1 ? C.gold : C.border}`, background: editing.is_featured === 1 ? `${C.gold}10` : "#f8fafc", cursor: "pointer", transition: "all 0.15s" }}
+                >
+                  <div style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${editing.is_featured === 1 ? C.gold : "#cbd5e1"}`, background: editing.is_featured === 1 ? C.gold : "white", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                    {editing.is_featured === 1 && <Check size={11} color="white" strokeWidth={3} />}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>Feature on Home Screen</div>
+                    <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Show in "Shop by Category" grid on homepage</div>
+                  </div>
+                </div>
+              </div>
+              {/* Right column */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <ImageUploadField
+                  label="Category Thumbnail *"
+                  value={editing.image}
+                  onChange={(u) => setEditing({ ...editing, image: u })}
+                  recommendedSize="500×500 px"
+                  placeholder="Upload square thumbnail"
+                />
+                <ImageUploadField
+                  label="Category Page Banner"
+                  value={editing.banner || ""}
+                  onChange={(u) => setEditing({ ...editing, banner: u })}
+                  recommendedSize="1600×500 px"
+                  placeholder="Upload wide banner for category page"
+                />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+              <button type="button" onClick={() => setEditing(null)} style={btnOutline}>Cancel</button>
+              <button type="submit" disabled={saving} style={btnGold}>
+                {saving ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Saving...</> : <><Check size={13} /> Save Category</>}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <ConfirmDelete
+          message={`Delete category "${deleteTarget.name}"? All products under this category will also be permanently deleted.`}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={deleting}
+        />
+      )}
+
+      <DataTable
+        headers={["", "Category", "Slug", "Featured", "Actions"]}
+        empty={categories.length === 0}
+      >
+        {categories.map((cat: any) => {
+          const isFeatured = cat.is_featured === 1 || cat.is_featured === true || cat.is_featured === "1";
+          return (
+            <tr key={cat.id} style={{ borderBottom: `1px solid #f1f5f9` }}>
+              <td style={{ ...tdStyle, width: 56 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 10, overflow: "hidden", background: "#f1f5f9", border: `1px solid ${C.border}` }}>
+                  {cat.image
+                    ? <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><ImageIcon size={16} color="#cbd5e1" /></div>
+                  }
+                </div>
+              </td>
+              <td style={tdStyle}>
+                <div style={{ fontWeight: 700, color: C.text, fontSize: 13 }}>{cat.name}</div>
+                {cat.blurb && <div style={{ fontSize: 11, color: C.muted, marginTop: 2, maxWidth: 250, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat.blurb}</div>}
+              </td>
+              <td style={tdStyle}>
+                <span style={{ fontFamily: "monospace", fontSize: 11, color: "#6366f1", background: "#eef2ff", padding: "3px 8px", borderRadius: 6 }}>{cat.slug}</span>
+              </td>
+              <td style={tdStyle}>
+                {isFeatured
+                  ? <span style={{ fontSize: 10, fontWeight: 700, color: "#059669", background: "#ecfdf5", border: "1px solid #a7f3d0", padding: "4px 10px", borderRadius: 20, textTransform: "uppercase", letterSpacing: "0.05em" }}>✓ Featured</span>
+                  : <span style={{ fontSize: 10, fontWeight: 700, color: C.muted, background: "#f1f5f9", padding: "4px 10px", borderRadius: 20, textTransform: "uppercase", letterSpacing: "0.05em" }}>Hidden</span>
+                }
+              </td>
+              <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button
+                    onClick={() => setEditing({ ...cat, is_featured: isFeatured ? 1 : 0 })}
+                    style={{ ...actionBtnStyle, color: "#6366f1" }}
+                    title="Edit category"
+                  >
+                    <Edit size={13} />
+                  </button>
+                  <button
+                    onClick={() => setDeleteTarget(cat)}
+                    style={{ ...actionBtnStyle, color: C.danger, borderColor: "#fecaca" }}
+                    title="Delete category"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          );
+        })}
+      </DataTable>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PRODUCTS TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function ProductsTab({ products, categories, onReload }: { products: any[]; categories: any[]; onReload: () => Promise<void> }) {
+  const [editing, setEditing] = React.useState<any>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [deleteTarget, setDeleteTarget] = React.useState<any>(null);
+  const [deleting, setDeleting] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+
+  const filteredProducts = products.filter((p: any) =>
+    p.name?.toLowerCase().includes(search.toLowerCase()) ||
+    p.category_slug?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const newProductForm = {
+    id: "",
+    slug: "",
+    name: "",
+    category_slug: categories[0]?.slug || "",
+    price: "",
+    old_price: "",
+    image: "",
+    gallery: [],
+    description: "",
+    details: ["Premium Quality Certified", "Available in bulk orders"],
+    specs: [
+      { label: "Material", value: "Ceramic" },
+      { label: "Size", value: "600 × 600 mm" },
+      { label: "Finish", value: "Glossy" },
+      { label: "Coverage", value: "4 tiles per box" },
+    ],
+    shipping_info: "Delivered across Barasat and nearby areas within 2–4 business days. Free shipping on orders above ₹5000.",
+    return_policy: "7-day hassle-free return on unused products in original packaging.",
+    isEdit: false,
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing.image) { toast.error("Please upload a product image."); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        ...editing,
+        price: parseFloat(editing.price) || 0,
+        old_price: editing.old_price ? parseFloat(editing.old_price) : null,
+      };
+      const res = await saveProductFn({ data: payload });
+      if (res.success) {
+        toast.success(editing.isEdit ? "Product updated!" : "Product created!");
+        setEditing(null);
+        await onReload();
+      } else {
+        toast.error("Failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      // FIXED: use { data: { id } } pattern to match server function signature
+      const res = await deleteProductFn({ data: { id: deleteTarget.id } });
+      if (res.success) {
+        toast.success("Product deleted successfully.");
+        setDeleteTarget(null);
+        await onReload();
+      } else {
+        toast.error("Delete failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const addSpec = () => setEditing({ ...editing, specs: [...(editing.specs || []), { label: "", value: "" }] });
+  const updateSpec = (i: number, k: "label" | "value", v: string) => {
+    const specs = [...editing.specs];
+    specs[i] = { ...specs[i], [k]: v };
+    setEditing({ ...editing, specs });
+  };
+  const removeSpec = (i: number) => setEditing({ ...editing, specs: editing.specs.filter((_: any, idx: number) => idx !== i) });
+
+  return (
+    <div>
+      <SectionHeader
+        title="Product Catalog"
+        subtitle={`Managing ${products.length} product${products.length !== 1 ? "s" : ""} across ${categories.length} categories.`}
+        action={
+          <button onClick={() => setEditing({ ...newProductForm })} style={btnGold}>
+            <Plus size={14} /> Add Product
+          </button>
+        }
+      />
+
+      {/* Search */}
+      <div style={{ marginBottom: 16 }}>
+        <input
+          style={{ ...inputStyle, maxWidth: 360 }}
+          type="text"
+          placeholder="Search products or category..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      {editing && (
+        <Modal title={editing.isEdit ? `Edit: ${editing.name}` : "Create New Product"} onClose={() => setEditing(null)} width={780}>
+          <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* Row 1: Basic info */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+              {!editing.isEdit && (
+                <div>
+                  <label style={labelStyle}>Product ID (optional)</label>
+                  <input style={inputStyle} type="text" value={editing.id} onChange={(e) => setEditing({ ...editing, id: e.target.value })} placeholder="Auto-generated if blank" />
+                </div>
+              )}
+              <div style={{ gridColumn: editing.isEdit ? "1 / 2" : undefined }}>
+                <label style={labelStyle}>Product Name *</label>
+                <input
+                  required
+                  style={inputStyle}
+                  type="text"
+                  value={editing.name}
+                  onChange={(e) => {
+                    const name = e.target.value;
+                    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "");
+                    setEditing({ ...editing, name, slug });
+                  }}
+                  placeholder="e.g. Marble Floor Tile 600×600"
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Category *</label>
+                <select
+                  required
+                  style={{ ...inputStyle, cursor: "pointer" }}
+                  value={editing.category_slug}
+                  onChange={(e) => setEditing({ ...editing, category_slug: e.target.value })}
+                >
+                  {categories.map((c: any) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+
+            {/* Row 2: Price */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+              <div>
+                <label style={labelStyle}>Price (₹) *</label>
+                <input required style={inputStyle} type="number" step="0.01" value={editing.price} onChange={(e) => setEditing({ ...editing, price: e.target.value })} placeholder="0.00" />
+              </div>
+              <div>
+                <label style={labelStyle}>Original Price (₹)</label>
+                <input style={inputStyle} type="number" step="0.01" value={editing.old_price} onChange={(e) => setEditing({ ...editing, old_price: e.target.value })} placeholder="Leave blank if no discount" />
+              </div>
+              <div>
+                <label style={labelStyle}>URL Slug</label>
+                <input style={{ ...inputStyle, fontFamily: "monospace", fontSize: 11 }} type="text" value={editing.slug} onChange={(e) => setEditing({ ...editing, slug: e.target.value })} placeholder="auto-generated-from-name" />
+              </div>
+            </div>
+
+            {/* Row 3: Images */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <ImageUploadField label="Main Product Image *" value={editing.image} onChange={(u) => setEditing({ ...editing, image: u })} recommendedSize="800×800 px" placeholder="Upload main product photo" />
+              <GalleryUpload gallery={editing.gallery || []} onChange={(g) => setEditing({ ...editing, gallery: g })} />
+            </div>
+
+            {/* Row 4: Description */}
+            <div>
+              <label style={labelStyle}>Description</label>
+              <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 80 }} value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="Detailed product description..." />
+            </div>
+
+            {/* Row 5: Specs */}
+            <div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <label style={labelStyle}>Specifications</label>
+                <button type="button" onClick={addSpec} style={{ ...btnGold, padding: "5px 12px", fontSize: 11 }}>
+                  <Plus size={11} /> Add Spec
+                </button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {(editing.specs || []).map((spec: any, i: number) => (
+                  <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, alignItems: "center" }}>
+                    <input style={{ ...inputStyle, padding: "8px 12px" }} type="text" value={spec.label} onChange={(e) => updateSpec(i, "label", e.target.value)} placeholder="Label (e.g. Material)" />
+                    <input style={{ ...inputStyle, padding: "8px 12px" }} type="text" value={spec.value} onChange={(e) => updateSpec(i, "value", e.target.value)} placeholder="Value (e.g. Ceramic)" />
+                    <button type="button" onClick={() => removeSpec(i)} style={{ ...actionBtnStyle, color: C.danger, borderColor: "#fecaca" }}>
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 6: Shipping + Returns */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div>
+                <label style={labelStyle}>Shipping Info</label>
+                <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 72 }} value={editing.shipping_info} onChange={(e) => setEditing({ ...editing, shipping_info: e.target.value })} placeholder="Delivery timeframe and areas served..." />
+              </div>
+              <div>
+                <label style={labelStyle}>Return Policy</label>
+                <textarea style={{ ...inputStyle, resize: "vertical", minHeight: 72 }} value={editing.return_policy} onChange={(e) => setEditing({ ...editing, return_policy: e.target.value })} placeholder="Return conditions and timeframe..." />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+              <button type="button" onClick={() => setEditing(null)} style={btnOutline}>Cancel</button>
+              <button type="submit" disabled={saving} style={btnGold}>
+                {saving ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Saving...</> : <><Check size={13} /> {editing.isEdit ? "Update Product" : "Create Product"}</>}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <ConfirmDelete
+          message={`Delete product "${deleteTarget.name}"? This action is permanent and cannot be undone.`}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={deleting}
+        />
+      )}
+
+      <DataTable
+        headers={["", "Product", "Category", "Price", "Actions"]}
+        empty={filteredProducts.length === 0}
+      >
+        {filteredProducts.map((p: any) => (
+          <tr key={p.id} style={{ borderBottom: `1px solid #f1f5f9` }}>
+            <td style={{ ...tdStyle, width: 56 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, overflow: "hidden", background: "#f1f5f9", border: `1px solid ${C.border}` }}>
+                {p.image
+                  ? <img src={p.image} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}><Package size={16} color="#cbd5e1" /></div>
+                }
+              </div>
+            </td>
+            <td style={tdStyle}>
+              <div style={{ fontWeight: 700, color: C.text, fontSize: 13 }}>{p.name}</div>
+              <div style={{ fontSize: 10, color: "#94a3b8", fontFamily: "monospace", marginTop: 2 }}>{p.id}</div>
+            </td>
+            <td style={tdStyle}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#6366f1", background: "#eef2ff", padding: "3px 10px", borderRadius: 6 }}>
+                {categories.find((c: any) => c.slug === p.category_slug)?.name || p.category_slug}
+              </span>
+            </td>
+            <td style={tdStyle}>
+              <div style={{ fontWeight: 800, color: C.text, fontSize: 13 }}>{inr(parseFloat(p.price) || 0)}</div>
+              {p.old_price && <div style={{ fontSize: 11, color: "#94a3b8", textDecoration: "line-through" }}>{inr(parseFloat(p.old_price))}</div>}
+            </td>
+            <td style={{ ...tdStyle, whiteSpace: "nowrap" }}>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  onClick={() => {
+                    let gallery = p.gallery || [];
+                    let specs = p.specs || [];
+                    let details = p.details || [];
+                    try { if (typeof gallery === "string") gallery = JSON.parse(gallery); } catch { gallery = []; }
+                    try { if (typeof specs === "string") specs = JSON.parse(specs); } catch { specs = []; }
+                    try { if (typeof details === "string") details = JSON.parse(details); } catch { details = []; }
+                    setEditing({ ...p, gallery, specs, details, price: p.price || "", old_price: p.old_price || "", isEdit: true });
+                  }}
+                  style={{ ...actionBtnStyle, color: "#6366f1" }}
+                  title="Edit product"
+                >
+                  <Edit size={13} />
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(p)}
+                  style={{ ...actionBtnStyle, color: C.danger, borderColor: "#fecaca" }}
+                  title="Delete product"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </td>
+          </tr>
+        ))}
+      </DataTable>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CUSTOMERS TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function CustomersTab({ customers }: { customers: any[] }) {
+  const downloadCSV = () => {
+    if (customers.length === 0) return;
+    const headers = ["Order ID", "Customer Name", "Mobile", "Address", "Items", "Total (INR)", "Date"];
+    const rows = customers.map((c: any) => {
+      let items = "";
+      try { items = JSON.parse(c.items || "[]").map((i: any) => `${i.name} (×${i.qty})`).join("; "); } catch { items = c.items || ""; }
+      return [c.id, `"${c.name}"`, c.mobile, `"${c.address}"`, `"${items}"`, c.total_price, new Date(c.created_at).toLocaleString("en-IN")];
+    });
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `Saha_Orders_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  };
+
+  return (
+    <div>
+      <SectionHeader
+        title="Customer Orders"
+        subtitle={`${customers.length} WhatsApp order${customers.length !== 1 ? "s" : ""} recorded.`}
+        action={
+          customers.length > 0
+            ? <button onClick={downloadCSV} style={btnGold}><Download size={13} /> Export CSV</button>
+            : undefined
+        }
+      />
+      <DataTable
+        headers={["#", "Customer", "Mobile", "Address", "Total", "Date"]}
+        empty={customers.length === 0}
+      >
+        {customers.map((c: any) => (
+          <tr key={c.id} style={{ borderBottom: `1px solid #f1f5f9` }}>
+            <td style={{ ...tdStyle, color: C.muted, fontSize: 11, fontFamily: "monospace" }}>#{c.id}</td>
+            <td style={tdStyle}><span style={{ fontWeight: 700, color: C.text }}>{c.name}</span></td>
+            <td style={tdStyle}><span style={{ fontFamily: "monospace", fontSize: 12, color: C.muted }}>{c.mobile}</span></td>
+            <td style={{ ...tdStyle, maxWidth: 220 }}><span style={{ fontSize: 12, color: C.muted, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.address}</span></td>
+            <td style={tdStyle}><span style={{ fontWeight: 800, color: C.goldHover }}>{inr(parseFloat(c.total_price) || 0)}</span></td>
+            <td style={tdStyle}><span style={{ fontSize: 11, color: C.muted }}>{new Date(c.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span></td>
+          </tr>
+        ))}
+      </DataTable>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SETTINGS TAB
+// ─────────────────────────────────────────────────────────────────────────────
+function SettingsTab({ settings, onReload }: { settings: Record<string, string>; onReload: () => Promise<void> }) {
+  const [whatsapp, setWhatsapp] = React.useState(settings.whatsapp_number || "919330833711");
+  const [saving, setSaving] = React.useState(false);
+
+  React.useEffect(() => {
+    setWhatsapp(settings.whatsapp_number || "919330833711");
+  }, [settings]);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await updateSettingFn({ key: "whatsapp_number", value: whatsapp });
+      if (res.success) {
+        toast.success("WhatsApp number updated globally!");
+        await onReload();
+      } else {
+        toast.error("Failed: " + (res.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      toast.error("Error: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div>
+      <SectionHeader title="Store Settings" subtitle="Configure global store settings like WhatsApp contact routing." />
+      <div style={{ background: "white", borderRadius: 16, border: `1px solid ${C.border}`, padding: "28px 28px", maxWidth: 520, boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
+        <h3 style={{ fontWeight: 800, fontSize: 15, color: C.text, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 8 }}>
+          <Phone size={16} color={C.gold} /> WhatsApp Configuration
+        </h3>
+        <p style={{ fontSize: 12, color: C.muted, margin: "0 0 24px", lineHeight: 1.6 }}>
+          This is the number customers are connected to when they tap "Order via WhatsApp". Use full international format without + or spaces.
+        </p>
+        <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div>
+            <label style={labelStyle}>WhatsApp Number (with country code)</label>
+            <input
+              required
+              style={inputStyle}
+              type="text"
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ""))}
+              placeholder="919330833711"
+            />
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>
+              Current: <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" style={{ color: "#059669", fontWeight: 600 }}>wa.me/{whatsapp}</a>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button type="submit" disabled={saving} style={btnGold}>
+              {saving ? <><Loader2 size={13} style={{ animation: "spin 1s linear infinite" }} /> Saving...</> : <><Check size={13} /> Save Settings</>}
+            </button>
+            <a href="/" target="_blank" rel="noreferrer" style={{ ...btnOutline, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Globe size={13} /> View Storefront
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDEBAR NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+const navItems = [
+  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "media", label: "Media Manager", icon: ImageIcon },
+  { id: "categories", label: "Categories", icon: Tags },
+  { id: "products", label: "Products", icon: ShoppingBag },
+  { id: "customers", label: "Customers", icon: Users },
+  { id: "settings", label: "Settings", icon: Settings },
+];
+
+function Sidebar({ activeTab, onTabChange, onLogout }: { activeTab: string; onTabChange: (t: string) => void; onLogout: () => void }) {
+  return (
+    <aside style={{ width: 240, background: C.sidebar, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: C.sidebarBorder }}>
+      {/* Logo */}
+      <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/src/logo.png" alt="Saha" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "white", padding: 2 }} />
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, letterSpacing: "0.04em" }}>SAHA MARBLE</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Admin Panel</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Nav links */}
+      <nav style={{ flex: 1, padding: "16px 10px", display: "flex", flexDirection: "column", gap: 2 }}>
+        {navItems.map((item) => {
+          const active = activeTab === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => onTabChange(item.id)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 14px",
+                borderRadius: 10,
+                border: "none",
+                background: active ? C.gold : "transparent",
+                color: active ? "#0f172a" : "rgba(255,255,255,0.55)",
+                fontSize: 13,
+                fontWeight: active ? 800 : 500,
+                cursor: "pointer",
+                textAlign: "left",
+                width: "100%",
+                transition: "all 0.15s",
+                letterSpacing: active ? "0.01em" : undefined,
+              }}
+            >
+              <item.icon size={16} />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Footer / Logout */}
+      <div style={{ padding: "16px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "white" }}>System Admin</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>admin@sahamarble.com</div>
+          </div>
+        </div>
+        <button
+          onClick={onLogout}
+          style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 12px", borderRadius: 8, border: "none", background: "rgba(239,68,68,0.1)", color: "#f87171", cursor: "pointer", fontSize: 12, fontWeight: 600, transition: "all 0.15s" }}
+        >
+          <LogOut size={14} /> Sign Out
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MAIN ADMIN PAGE
+// ─────────────────────────────────────────────────────────────────────────────
 function AdminPage() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<"dashboard" | "media" | "categories" | "products" | "customers" | "whatsapp">("dashboard");
-  const [isLoading, setIsLoading] = React.useState(true);
-  
-  // Login Form State
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [loginError, setLoginError] = React.useState("");
-  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<string>("dashboard");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  // Database Data States
+  // All data lives here — each tab receives its slice + a reload callback
   const [stats, setStats] = React.useState<any>({ products: 0, categories: 0, customers: 0, visitors: 0, recentOrders: [] });
   const [banners, setBanners] = React.useState<any[]>([]);
   const [categories, setCategories] = React.useState<any[]>([]);
@@ -252,1249 +1425,132 @@ function AdminPage() {
   const [customers, setCustomers] = React.useState<any[]>([]);
   const [settings, setSettings] = React.useState<Record<string, string>>({ whatsapp_number: "919330833711" });
 
-  // Form Editing States
-  const [editingBanner, setEditingBanner] = React.useState<any>(null);
-  const [editingCategory, setEditingCategory] = React.useState<any>(null);
-  const [editingProduct, setEditingProduct] = React.useState<any>(null);
-
-  // Loader feedback
-  const [actionLoading, setActionLoading] = React.useState(false);
-  const [feedback, setFeedback] = React.useState("");
-
-  // Check auth state on mount
+  // Auth check on mount
   React.useEffect(() => {
     const auth = sessionStorage.getItem("saha_admin_auth");
     if (auth === "true") {
       setIsLoggedIn(true);
-      fetchData();
-    } else {
-      setIsLoading(false);
+      loadAllData();
     }
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    setIsLoggingIn(true);
+  const loadAllData = async () => {
+    setIsLoading(true);
+    try {
+      const [s, b, cats, prods, custs, sett] = await Promise.all([
+        getDashboardStatsFn(),
+        getBannersFn(),
+        getCategoriesFn(),
+        getProductsFn(),
+        getCustomersFn(),
+        getSettingsFn(),
+      ]);
+      setStats(s || { products: 0, categories: 0, customers: 0, visitors: 0, recentOrders: [] });
+      setBanners(b || []);
+      setCategories(cats || []);
+      setProducts(prods || []);
+      setCustomers(custs || []);
+      if (sett) setSettings(sett);
+    } catch (err) {
+      console.error("Error loading admin data:", err);
+      toast.error("Failed to load data. Please refresh.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    setTimeout(() => {
-      if (username === "admin" && password === "admin123") {
-        sessionStorage.setItem("saha_admin_auth", "true");
-        setIsLoggedIn(true);
-        fetchData();
-      } else {
-        setLoginError("Invalid username or password");
-        setIsLoggingIn(false);
-      }
-    }, 600);
+  // Called by each tab after a CRUD op — reloads data AND invalidates frontend routes
+  const handleReload = async () => {
+    await loadAllData();
+    await router.invalidate();
   };
 
   const handleLogout = () => {
     sessionStorage.removeItem("saha_admin_auth");
     setIsLoggedIn(false);
-    setUsername("");
-    setPassword("");
   };
 
-  const fetchData = async () => {
-    setIsLoading(true);
-    try {
-      const dashboardStats = await getDashboardStatsFn();
-      const loadedBanners = await getBannersFn();
-      const loadedCategories = await getCategoriesFn();
-      const loadedProducts = await getProductsFn();
-      const loadedCustomers = await getCustomersFn();
-      const loadedSettings = await getSettingsFn();
-
-      setStats(dashboardStats);
-      setBanners(loadedBanners);
-      setCategories(loadedCategories);
-      setProducts(loadedProducts);
-      setCustomers(loadedCustomers);
-      if (loadedSettings.whatsapp_number) {
-        setSettings(loadedSettings);
-      }
-    } catch (err) {
-      console.error("Error loading admin data:", err);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadAllData();
+    setIsRefreshing(false);
+    toast.success("Data refreshed!");
   };
 
-  const showFeedback = (msg: string) => {
-    setFeedback(msg);
-    setTimeout(() => setFeedback(""), 3500);
-  };
-
-  // ==========================================
-  // Media Slide CRUD actions
-  // ==========================================
-  const handleSaveBanner = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(true);
-    try {
-      const res = await saveBannerFn({ data: editingBanner });
-      if (res.success) {
-        const loaded = await getBannersFn();
-        setBanners(loaded);
-        setEditingBanner(null);
-        await router.invalidate();
-        toast.success("Banner slide saved successfully!");
-      } else {
-        toast.error("Failed to save banner: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error saving banner: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleDeleteBanner = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this banner?")) return;
-    setActionLoading(true);
-    try {
-      const res = await deleteBannerFn({ id });
-      if (res.success) {
-        const loaded = await getBannersFn();
-        setBanners(loaded);
-        await router.invalidate();
-        toast.success("Banner slide deleted successfully.");
-      } else {
-        toast.error("Failed to delete banner: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error deleting banner: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // ==========================================
-  // Categories CRUD actions
-  // ==========================================
-  const handleSaveCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(true);
-    try {
-      const res = await saveCategoryFn({ data: editingCategory });
-      if (res.success) {
-        const loaded = await getCategoriesFn();
-        setCategories(loaded);
-        setEditingCategory(null);
-        await router.invalidate();
-        toast.success("Category saved successfully!");
-      } else {
-        toast.error("Failed to save category: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error saving category: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleDeleteCategory = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this category? All products under it will be deleted!")) return;
-    setActionLoading(true);
-    try {
-      const res = await deleteCategoryFn({ id });
-      if (res.success) {
-        const loaded = await getCategoriesFn();
-        setCategories(loaded);
-        // Refresh products since they cascade delete in DB
-        const prod = await getProductsFn();
-        setProducts(prod);
-        await router.invalidate();
-        toast.success("Category and all its products deleted successfully.");
-      } else {
-        toast.error("Failed to delete category: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error deleting category: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // ==========================================
-  // Products CRUD actions
-  // ==========================================
-  const handleSaveProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(true);
-    try {
-      const res = await saveProductFn({ data: editingProduct });
-      if (res.success) {
-        const loaded = await getProductsFn();
-        setProducts(loaded);
-        setEditingProduct(null);
-        await router.invalidate();
-        toast.success("Product saved successfully!");
-      } else {
-        toast.error("Failed to save product: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error saving product: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleDeleteProduct = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-    setActionLoading(true);
-    try {
-      const res = await deleteProductFn({ id });
-      if (res.success) {
-        const loaded = await getProductsFn();
-        setProducts(loaded);
-        await router.invalidate();
-        toast.success("Product deleted successfully.");
-      } else {
-        toast.error("Failed to delete product: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error deleting product: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // ==========================================
-  // Settings CRUD actions
-  // ==========================================
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setActionLoading(true);
-    try {
-      const res = await updateSettingFn({ key: "whatsapp_number", value: settings.whatsapp_number });
-      if (res.success) {
-        await router.invalidate();
-        toast.success("WhatsApp settings updated globally!");
-      } else {
-        toast.error("Failed to save settings: " + (res.error || "Unknown error"));
-      }
-    } catch (e: any) {
-      toast.error("Error saving settings: " + e.message);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // ==========================================
-  // CSV Export for Customers Log
-  // ==========================================
-  const downloadCustomerCSV = () => {
-    if (customers.length === 0) return;
-    
-    // CSV Header row
-    const headers = ["Order ID", "Customer Name", "Mobile Number", "Address", "Items Ordered", "Total Price (INR)", "Date"];
-    
-    const rows = customers.map((c: any) => {
-      let itemsSummary = "";
-      try {
-        const items = JSON.parse(c.items || "[]");
-        itemsSummary = items.map((i: any) => `${i.name} (Qty: ${i.qty})`).join("; ");
-      } catch {
-        itemsSummary = c.items || "";
-      }
-      
-      return [
-        c.id,
-        `"${c.name.replace(/"/g, '""')}"`,
-        c.mobile,
-        `"${c.address.replace(/"/g, '""')}"`,
-        `"${itemsSummary.replace(/"/g, '""')}"`,
-        c.total_price,
-        new Date(c.created_at).toLocaleString()
-      ];
-    });
-
-    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Saha_Marbles_Customers_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Render Login view if not authenticated
   if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-slate-brand flex items-center justify-center p-6 relative overflow-hidden">
-        {/* Glow rings */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--gold)]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="w-full max-w-md bg-slate-900/60 border border-[var(--gold)]/30 rounded-2xl p-8 backdrop-blur-md shadow-2xl relative z-10 animate-fade-up">
-          <div className="text-center mb-8">
-            <div className="text-2xl font-display font-semibold text-[var(--gold)] tracking-wider">
-              SAHA MARBLE & TILES
-            </div>
-            <div className="text-xs text-white/50 uppercase tracking-widest mt-1">
-              Systems Control Portal
-            </div>
-          </div>
-
-          {loginError && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-xs rounded-lg p-3.5 mb-6 flex items-start gap-2">
-              <ShieldAlert size={16} className="shrink-0 mt-0.5" />
-              <span>{loginError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-xs uppercase tracking-wider font-semibold text-white/60 mb-2">Username</label>
-              <input
-                required
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] transition-all"
-                placeholder="Enter admin user ID"
-              />
-            </div>
-            <div>
-              <label className="block text-xs uppercase tracking-wider font-semibold text-white/60 mb-2">Password</label>
-              <input
-                required
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-[var(--gold)] focus:ring-1 focus:ring-[var(--gold)] transition-all"
-                placeholder="Enter password"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoggingIn}
-              className="w-full bg-[var(--gold)] hover:bg-white text-slate-brand hover:text-slate-brand transition-all py-3.5 px-6 rounded-lg text-sm font-bold shadow-lg shadow-black/20 flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
-            >
-              {isLoggingIn ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" /> Verifying Systems...
-                </>
-              ) : (
-                "Authorize Access"
-              )}
-            </button>
-          </form>
-        </div>
-      </div>
-    );
+    return <LoginPage onLogin={() => { setIsLoggedIn(true); loadAllData(); }} />;
   }
 
-  // Render Loader spinner if fetching dashboard data
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-3">
-        <Loader2 size={36} className="text-[var(--gold)] animate-spin" />
-        <span className="text-xs uppercase tracking-widest text-[var(--charcoal)]/50 font-semibold">Loading Control Portal...</span>
-      </div>
-    );
-  }
+  const tabTitles: Record<string, string> = {
+    dashboard: "Dashboard",
+    media: "Media Manager",
+    categories: "Category Manager",
+    products: "Product Catalog",
+    customers: "Customer Orders",
+    settings: "Store Settings",
+  };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col lg:flex-row text-[var(--slate)] font-sans">
-      {/* 1. SIDEBAR (Persistent Desktop, Floating Mobile) */}
-      <aside className="lg:w-64 bg-slate-brand text-white border-r border-[var(--gold)]/20 flex flex-col justify-between shrink-0">
-        <div>
-          {/* Logo & Header */}
-          <div className="p-6 border-b border-white/5 flex items-center gap-3">
-            <img src="/src/logo.png" alt="Saha logo" className="h-10 w-auto object-contain bg-white rounded p-0.5 shrink-0" />
-            <div className="text-left leading-tight">
-              <span className="font-display text-sm font-semibold tracking-wider block text-[var(--gold)]">SAHA MARBLE</span>
-              <span className="text-[10px] text-white/50 uppercase tracking-widest font-medium">Tiles & Fittings</span>
-            </div>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif", background: C.bg }}>
+      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onLogout={handleLogout} />
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+        {/* Top bar */}
+        <header style={{ height: 60, background: "white", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", flexShrink: 0, boxShadow: "0 1px 4px rgba(0,0,0,0.04)" }}>
+          <div>
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: C.text, margin: 0 }}>{tabTitles[activeTab]}</h1>
           </div>
-
-          {/* Navigation Links */}
-          <nav className="p-4 space-y-1">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-              { id: "media", label: "Media Manager", icon: ImageIcon },
-              { id: "categories", label: "Category Manager", icon: Tags },
-              { id: "products", label: "Product Manager", icon: ShoppingBag },
-              { id: "customers", label: "Customers", icon: Users },
-              { id: "whatsapp", label: "WhatsApp Settings", icon: Phone },
-            ].map((tab) => {
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveTab(tab.id as any);
-                    setEditingBanner(null);
-                    setEditingCategory(null);
-                    setEditingProduct(null);
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all text-left ${
-                    active 
-                      ? "bg-[var(--gold)] text-slate-brand font-bold shadow-md shadow-black/10" 
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <tab.icon size={18} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* User profile / Logout */}
-        <div className="p-4 border-t border-white/5 bg-slate-950/20">
-          <div className="flex items-center justify-between">
-            <div className="text-left">
-              <div className="text-xs font-semibold text-white">System Admin</div>
-              <div className="text-[10px] text-white/40">admin@royal300.com</div>
-            </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <button
-              onClick={handleLogout}
-              className="w-8 h-8 rounded-full bg-white/5 hover:bg-red-500/10 text-white/70 hover:text-red-400 flex items-center justify-center transition-colors"
-              title="Logout System"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              style={{ ...btnOutline, padding: "7px 14px", display: "inline-flex", alignItems: "center", gap: 6 }}
+              title="Refresh all data from database"
             >
-              <LogOut size={16} />
+              <RefreshCw size={13} style={isRefreshing ? { animation: "spin 1s linear infinite" } : undefined} />
+              Refresh
             </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* 2. MAIN BODY */}
-      <main className="flex-1 flex flex-col min-w-0 relative">
-        {/* Toast Notification popup */}
-        {feedback && (
-          <div className="fixed top-6 right-6 z-50 bg-slate-900 border border-[var(--gold)]/50 text-white text-xs font-semibold rounded-xl py-3.5 px-6 shadow-2xl animate-slide-in-right flex items-center gap-2">
-            <CheckCircle size={14} className="text-[var(--gold)]" />
-            <span>{feedback}</span>
-          </div>
-        )}
-
-        {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-subtle flex items-center justify-between px-6 md:px-8">
-          <div className="flex items-center gap-3">
-            <h1 className="font-display font-semibold text-lg md:text-xl capitalize text-slate-brand">
-              {activeTab === "whatsapp" ? "WhatsApp Configuration" : `${activeTab} manager`}
-            </h1>
-            <span className="text-[var(--gold)]/35 text-xs">•</span>
-            <span className="text-xs uppercase tracking-widest text-[var(--charcoal)]/50 font-semibold">Saha Administration</span>
-          </div>
-
-          <div className="flex items-center gap-4">
             <a
               href="/"
               target="_blank"
-              className="text-xs font-semibold border border-subtle rounded-full py-1.5 px-4 text-slate-brand hover:border-[var(--gold)]/60 hover:text-[var(--gold)] transition-colors flex items-center gap-1.5 shadow-sm bg-white"
+              rel="noreferrer"
+              style={{ ...btnOutline, padding: "7px 14px", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6, color: C.muted }}
             >
-              <Globe size={13} /> Storefront
+              <Globe size={13} /> Storefront ↗
             </a>
           </div>
         </header>
 
-        {/* Dynamic Route Container */}
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto">
-          {actionLoading && (
-            <div className="absolute inset-0 z-[100] bg-white/40 backdrop-blur-[0.5px] flex items-center justify-center">
-              <Loader2 size={36} className="text-[var(--gold)] animate-spin" />
+        {/* Content area */}
+        <main style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+          {isLoading ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300, gap: 14 }}>
+              <Loader2 size={36} color={C.gold} style={{ animation: "spin 1s linear infinite" }} />
+              <span style={{ fontSize: 12, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em" }}>Loading data...</span>
             </div>
+          ) : (
+            <>
+              {activeTab === "dashboard" && <DashboardTab stats={stats} />}
+              {activeTab === "media" && <MediaTab banners={banners} onReload={handleReload} />}
+              {activeTab === "categories" && <CategoriesTab categories={categories} onReload={handleReload} />}
+              {activeTab === "products" && <ProductsTab products={products} categories={categories} onReload={handleReload} />}
+              {activeTab === "customers" && <CustomersTab customers={customers} />}
+              {activeTab === "settings" && <SettingsTab settings={settings} onReload={handleReload} />}
+            </>
           )}
+        </main>
+      </div>
 
-          {/* ==========================================
-              TAB A: ANALYTICS DASHBOARD
-              ========================================== */}
-          {activeTab === "dashboard" && (
-            <div className="space-y-8 animate-fade-up">
-              {/* Analytics Metric Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                {[
-                  { label: "Products Catalog", count: stats.products, icon: ShoppingBag, color: "from-blue-500/10 to-indigo-500/10 border-blue-500/20 text-blue-600" },
-                  { label: "Tile Categories", count: stats.categories, icon: Tags, color: "from-amber-500/10 to-orange-500/10 border-amber-500/20 text-amber-600" },
-                  { label: "Total Purchases", count: stats.customers, icon: Users, color: "from-emerald-500/10 to-teal-500/10 border-emerald-500/20 text-emerald-600" },
-                ].map((card, idx) => (
-                  <div 
-                    key={idx} 
-                    className="bg-white border rounded-xl p-5 md:p-6 shadow-sm hover:shadow-md transition-all flex items-center justify-between relative overflow-hidden"
-                  >
-                    <div className="text-left relative z-10">
-                      <div className="text-2xl md:text-3xl font-display font-bold text-slate-brand leading-none">
-                        {card.count}
-                      </div>
-                      <div className="text-[11px] md:text-xs text-[var(--charcoal)]/50 uppercase tracking-widest font-semibold mt-1.5 leading-none">
-                        {card.label}
-                      </div>
-                    </div>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                      <card.icon size={22} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Analytics table: Recent WhatsApp checkout orders */}
-              <div className="bg-white border border-subtle rounded-xl p-6 shadow-sm text-left">
-                <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">Recent Orders</h3>
-                  <button 
-                    onClick={() => setActiveTab("customers")} 
-                    className="text-xs font-bold text-[var(--gold)] hover:text-slate-brand transition-colors flex items-center gap-1 bg-slate-50 border border-subtle hover:border-[var(--gold)]/50 rounded-full px-4 py-1.5 shadow-sm cursor-pointer"
-                  >
-                    View All Customers Log <ArrowRight size={12} />
-                  </button>
-                </div>
-                {stats.recentOrders.length === 0 ? (
-                  <div className="text-center py-10 text-[var(--charcoal)]/50 text-sm">No orders registered yet.</div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-left">
-                      <thead>
-                        <tr className="border-b border-subtle bg-slate-50/50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
-                          <th className="py-3 px-4">Customer Name</th>
-                          <th className="py-3 px-4">Contact Number</th>
-                          <th className="py-3 px-4">Delivery Address</th>
-                          <th className="py-3 px-4 text-right">Order Date</th>
-                          <th className="py-3 px-4 text-right">Total Price</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-subtle">
-                        {stats.recentOrders.map((ord: any) => (
-                          <tr key={ord.id} className="hover:bg-slate-50/50">
-                            <td className="py-3.5 px-4 font-semibold text-slate-brand">{ord.name}</td>
-                            <td className="py-3.5 px-4 font-mono text-xs text-[var(--charcoal)]/80">{ord.mobile}</td>
-                            <td className="py-3.5 px-4 text-xs text-[var(--slate)] max-w-xs truncate">{ord.address}</td>
-                            <td className="py-3.5 px-4 text-right text-xs text-[var(--charcoal)]/50">{new Date(ord.created_at).toLocaleDateString()}</td>
-                            <td className="py-3.5 px-4 text-right font-bold text-[var(--gold)]">{inr(ord.total_price)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================
-              TAB B: MEDIA MANAGER (Slideshow Slider)
-              ========================================== */}
-          {activeTab === "media" && (
-            <div className="space-y-6 text-left animate-fade-up">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">Slideshow Slider Images</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50">Add or manage banner slides running in your home page header slideshow.</p>
-                </div>
-                <button 
-                  onClick={() => setEditingBanner({ image: "", heading: "", sub: "", label: "", slug: "", display_order: 1 })}
-                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                >
-                  <Plus size={14} /> Add Slide Banner
-                </button>
-              </div>
-
-              {/* Banner Modal */}
-              {editingBanner && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle">
-                      <h4 className="font-display font-semibold text-slate-brand text-base">
-                        {editingBanner.id ? "Edit Slide Banner" : "Add New Slide Banner"}
-                      </h4>
-                      <button type="button" onClick={() => setEditingBanner(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
-                    </div>
-                    <form onSubmit={handleSaveBanner} className="p-6 space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <ImageUploadField
-                          label="Banner Image *"
-                          value={editingBanner.image}
-                          onChange={(url) => setEditingBanner({ ...editingBanner, image: url })}
-                          recommendedSize="1920x800 px"
-                          placeholder="Upload JPG/PNG banner slide..."
-                        />
-                        <div>
-                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Label (Mini Tag)</label>
-                          <input type="text" value={editingBanner.label} onChange={(e) => setEditingBanner({ ...editingBanner, label: e.target.value })} className="ipt" placeholder="e.g. Floor & Wall Tiles" />
-                        </div>
-                        <div>
-                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Heading</label>
-                          <input type="text" value={editingBanner.heading} onChange={(e) => setEditingBanner({ ...editingBanner, heading: e.target.value })} className="ipt" placeholder="Leave blank for image-only slide" />
-                        </div>
-                        <div>
-                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Subtitle</label>
-                          <input type="text" value={editingBanner.sub} onChange={(e) => setEditingBanner({ ...editingBanner, sub: e.target.value })} className="ipt" placeholder="e.g. Premium floor and wall tiles" />
-                        </div>
-                        <div>
-                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Link Category Slug</label>
-                          <input type="text" value={editingBanner.slug} onChange={(e) => setEditingBanner({ ...editingBanner, slug: e.target.value })} className="ipt" placeholder="e.g. floor-tiles" />
-                        </div>
-                        <div>
-                          <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Display Order</label>
-                          <input type="number" value={editingBanner.display_order} onChange={(e) => setEditingBanner({ ...editingBanner, display_order: parseInt(e.target.value) || 0 })} className="ipt" placeholder="1" />
-                        </div>
-                      </div>
-                      <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                        <button type="button" onClick={() => setEditingBanner(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                        <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Banner</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              )}
-
-              {/* Banners display */}
-              <div className="grid md:grid-cols-3 gap-6">
-                {banners.map((ban: any) => (
-                  <div key={ban.id} className="bg-white border border-subtle rounded-xl overflow-hidden shadow-sm flex flex-col justify-between">
-                    <div className="aspect-[16/9] w-full overflow-hidden bg-slate-100 relative">
-                      <img src={ban.image} alt="" className="w-full h-full object-cover" />
-                      {!ban.heading && (
-                        <div className="absolute top-2 right-2 bg-slate-900/80 text-white text-[9px] font-bold py-1 px-2.5 rounded">Image Only</div>
-                      )}
-                    </div>
-                    <div className="p-4 flex-1 flex flex-col justify-between">
-                      <div className="text-left mb-4">
-                        <div className="text-[10px] uppercase font-bold text-[var(--gold)] tracking-wider">{ban.label || "No Tag Label"}</div>
-                        <h4 className="font-display font-semibold text-slate-brand text-sm line-clamp-1 mt-0.5">{ban.heading || "Image-Only Slide"}</h4>
-                        <p className="text-[11px] text-[var(--charcoal)]/60 line-clamp-2 mt-1">{ban.sub || "Background image only slide."}</p>
-                        <div className="text-[10px] font-mono text-[var(--charcoal)]/50 mt-2">Order: {ban.display_order}</div>
-                      </div>
-                      <div className="flex gap-2 justify-end border-t border-subtle pt-3">
-                        <button onClick={() => setEditingBanner(ban)} className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors"><Edit size={13} /></button>
-                        <button onClick={() => handleDeleteBanner(ban.id)} className="w-8 h-8 rounded border border-subtle text-red-500 hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center transition-colors"><Trash2 size={13} /></button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================
-              TAB C: CATEGORY MANAGER
-              ========================================== */}
-          {activeTab === "categories" && (
-            <div className="space-y-6 text-left animate-fade-up">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">Category Manager</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50">Add, edit, or delete storefront tile categories.</p>
-                </div>
-                <button 
-                  onClick={() => setEditingCategory({ name: "", slug: "", image: "", banner: "", blurb: "", is_featured: 1 })}
-                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                >
-                  <Plus size={14} /> Add Category
-                </button>
-              </div>
-
-              {/* Category Collapsible Inline Form — 4 fields: Name, Image, Banner, Featured */}
-              {editingCategory && (
-                <div className="bg-white rounded-2xl border border-subtle shadow-md overflow-hidden animate-fade-down mb-6">
-                  {/* Form Header */}
-                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-4.5 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-display font-semibold text-white text-base">
-                        {editingCategory.id ? "✏️ Edit Category" : "✨ Add New Category"}
-                      </h4>
-                      <p className="text-white/50 text-[10px] uppercase tracking-wider font-semibold mt-0.5">Instant Category Creator</p>
-                    </div>
-                    <button type="button" onClick={() => setEditingCategory(null)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-red-500/80 text-white flex items-center justify-center text-lg font-light transition-all cursor-pointer">&times;</button>
-                  </div>
-                  <form onSubmit={handleSaveCategory} className="p-6 space-y-5">
-                    {/* Grid to align side by side and prevent vertical bloating */}
-                    <div className="grid md:grid-cols-2 gap-5">
-                      {/* Left Column: Name & Featured Toggle */}
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-[10px] uppercase tracking-wider font-bold text-slate-500 mb-1.5">Category Name *</label>
-                          <input 
-                            required
-                            type="text"
-                            value={editingCategory.name}
-                            onChange={(e) => {
-                              const name = e.target.value;
-                              const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/,"");
-                              setEditingCategory({ ...editingCategory, name, slug });
-                            }}
-                            className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[var(--gold)] focus:outline-none text-sm font-medium text-slate-800 bg-slate-50 transition-colors"
-                            placeholder="e.g. Vitrified Tiles"
-                            autoFocus
-                          />
-                          {editingCategory.slug && (
-                            <div className="text-[9px] text-slate-400 mt-1 font-mono">URL: /category/{editingCategory.slug}</div>
-                          )}
-                        </div>
-
-                        {/* Feature Toggle */}
-                        <div 
-                          className={`flex items-center gap-3.5 rounded-xl border-2 px-3.5 py-3 cursor-pointer transition-all ${
-                            editingCategory.is_featured === 1 
-                              ? 'border-amber-400 bg-amber-50/50' 
-                              : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
-                          }`}
-                          onClick={() => setEditingCategory({ ...editingCategory, is_featured: editingCategory.is_featured === 1 ? 0 : 1 })}
-                        >
-                          <div className={`w-5 h-5 rounded-lg flex items-center justify-center border-2 shrink-0 transition-all ${
-                            editingCategory.is_featured === 1 
-                              ? 'bg-amber-400 border-amber-400' 
-                              : 'bg-white border-slate-300'
-                          }`}>
-                            {editingCategory.is_featured === 1 && <Check size={11} className="text-white" strokeWidth={3.5} />}
-                          </div>
-                          <div className="leading-tight">
-                            <div className="text-xs font-bold text-slate-700">Feature on Home Screen</div>
-                            <div className="text-[9px] text-slate-400 mt-0.5">Show inside "Shop by Category" grid</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Column: Thumbnail & Wide Banner side by side */}
-                      <div className="space-y-4">
-                        <ImageUploadField
-                          label="Category Thumbnail Image *"
-                          value={editingCategory.image}
-                          onChange={(url) => setEditingCategory({ ...editingCategory, image: url })}
-                          recommendedSize="500×500 px (Square)"
-                          placeholder="Upload square thumbnail image"
-                        />
-                        <ImageUploadField
-                          label="Category Page Banner Image"
-                          value={editingCategory.banner || ""}
-                          onChange={(url) => setEditingCategory({ ...editingCategory, banner: url })}
-                          recommendedSize="1600×500 px (Wide)"
-                          placeholder="Upload wide banner for category page top"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                      <button type="button" onClick={() => setEditingCategory(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                      <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold min-w-[120px]">
-                        {actionLoading ? <Loader2 size={14} className="animate-spin mx-auto" /> : 'Save Category'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {/* Categories list table */}
-              <div className="bg-white border border-subtle rounded-xl overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead>
-                      <tr className="border-b border-subtle bg-slate-50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
-                        <th className="py-4 px-6 w-20">Image</th>
-                        <th className="py-4 px-6">Category Name</th>
-                        <th className="py-4 px-6 text-center">Featured on Home</th>
-                        <th className="py-4 px-6 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-subtle">
-                      {categories.map((cat: any) => (
-                        <tr key={cat.id} className="hover:bg-slate-50/50">
-                          <td className="py-4 px-6">
-                            <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-subtle">
-                              {cat.image ? (
-                                <img 
-                                  src={cat.image} 
-                                  alt={cat.name} 
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f1f5f9"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%2394a3b8" font-size="18">?</text></svg>'; }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={16}/></div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-4 px-6">
-                            <div className="font-semibold text-slate-brand text-sm">{cat.name}</div>
-                            <div className="text-[10px] font-mono text-[var(--charcoal)]/40 mt-0.5">{cat.slug}</div>
-                          </td>
-                          <td className="py-4 px-6 text-center">
-                            {(cat.is_featured === 1 || cat.is_featured === true || cat.is_featured === "1") ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 py-1 px-3 rounded-full uppercase">✓ Featured</span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--charcoal)]/40 bg-slate-100 py-1 px-3 rounded-full uppercase">Hidden</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            <div className="flex gap-2 justify-end">
-                              <button 
-                                onClick={() => setEditingCategory({ ...cat, is_featured: (cat.is_featured === 1 || cat.is_featured === true || cat.is_featured === "1") ? 1 : 0 })}
-                                className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors bg-white"
-                              >
-                                <Edit size={13} />
-                              </button>
-                              <button 
-                                onClick={() => handleDeleteCategory(cat.id)}
-                                className="w-8 h-8 rounded border border-subtle text-red-500 hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center transition-colors bg-white"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                      {categories.length === 0 && (
-                        <tr><td colSpan={4} className="py-12 text-center text-[var(--charcoal)]/50 text-sm">No categories yet. Click "Add Category" to create one.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================
-              TAB D: PRODUCT MANAGER
-              ========================================== */}
-          {activeTab === "products" && (
-            <div className="space-y-6 text-left animate-fade-up">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">Product Catalog Manager</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50">Manage your tiles catalog. Add, edit, or delete items instantly.</p>
-                </div>
-                <button 
-                  onClick={() => setEditingProduct({ 
-                    id: "", slug: "", name: "", category_slug: categories[0]?.slug || "", 
-                    price: 0, old_price: 0, image: "", gallery: [], description: "", 
-                    details: ["Premium Quality Certified", "Available in bulk orders"], 
-                    specs: [{ label: "Material", value: "Ceramic" }, { label: "Size", value: "600 × 600 mm" }, { label: "Finish", value: "Glossy" }, { label: "Coverage", value: "4 tiles per box" }],
-                    shipping_info: "Delivered across Barasat and nearby areas within 2–4 business days. Free shipping on orders above ₹5000.",
-                    return_policy: "7-day hassle-free return on unused products in original packaging."
-                  })}
-                  className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold"
-                >
-                  <Plus size={14} /> Create New Product
-                </button>
-              </div>
-
-              {/* Product Modal */}
-              {editingProduct && (
-                <div className="fixed inset-0 z-[200] flex items-start justify-center p-4 overflow-y-auto" style={{background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)'}}>
-                  <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl my-6">
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-subtle sticky top-0 bg-white rounded-t-2xl z-10">
-                      <h4 className="font-display font-semibold text-slate-brand text-base">
-                        {editingProduct.isEdit ? "Edit Product" : "Create New Product"}
-                      </h4>
-                      <button type="button" onClick={() => setEditingProduct(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-100 text-slate-500 hover:text-red-500 flex items-center justify-center text-lg font-bold transition-colors cursor-pointer">×</button>
-                    </div>
-                  <form onSubmit={handleSaveProduct} className="p-6 space-y-5">
-                  <div className=""></div>
-                  
-                  {/* Standard details grid */}
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Product ID (Optional SKU)</label>
-                      <input 
-                        type="text"
-                        disabled={editingProduct.isEdit}
-                        value={editingProduct.id}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, id: e.target.value })}
-                        className="ipt disabled:bg-slate-100 disabled:text-slate-400"
-                        placeholder="Leave blank to use slug as ID"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Product Name *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingProduct.name}
-                        onChange={(e) => {
-                          const name = e.target.value;
-                          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-                          setEditingProduct({ ...editingProduct, name, slug });
-                        }}
-                        className="ipt"
-                        placeholder="e.g. Carrara Gold Glazed Tile"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">URL URL Slug *</label>
-                      <input 
-                        required
-                        type="text"
-                        value={editingProduct.slug}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, slug: e.target.value })}
-                        className="ipt"
-                        placeholder="e.g. carrara-gold-glazed-tile"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Product Category *</label>
-                      <select
-                        value={editingProduct.category_slug}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, category_slug: e.target.value })}
-                        className="ipt"
-                      >
-                        {categories.map(c => (
-                          <option key={c.slug} value={c.slug}>{c.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Offer Price *</label>
-                      <input 
-                        required
-                        type="number"
-                        value={editingProduct.price}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
-                        className="ipt"
-                        placeholder="e.g. 520"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Original Price (Strikeout)</label>
-                      <input 
-                        type="number"
-                        value={editingProduct.old_price}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || 0 })}
-                        className="ipt"
-                        placeholder="e.g. 680"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-5 border-t border-subtle pt-4 space-y-2">
-                    <ImageUploadField
-                      label="Main Product Image *"
-                      value={editingProduct.image}
-                      onChange={(url) => setEditingProduct({ ...editingProduct, image: url })}
-                      recommendedSize="800x800 px (Square)"
-                      placeholder="Upload JPG/PNG main product showcase image..."
-                    />
-                    <GalleryUploadField
-                      gallery={editingProduct.gallery || []}
-                      onChange={(urls) => setEditingProduct({ ...editingProduct, gallery: urls })}
-                    />
-                  </div>
-
-                  <div className="border-t border-subtle pt-4 space-y-4">
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-brand mb-1">Product Description & Bullet Details</label>
-                    <div>
-                      <label className="block text-[11px] uppercase tracking-wider font-medium text-[var(--charcoal)]/60 mb-1.5">Summary Text</label>
-                      <textarea 
-                        rows={2}
-                        value={editingProduct.description}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
-                        className="ipt"
-                        placeholder="Detailed text description..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] uppercase tracking-wider font-medium text-[var(--charcoal)]/60 mb-1.5">Highlights / Checklist Boxes (one per line)</label>
-                      <textarea 
-                        rows={2}
-                        value={Array.isArray(editingProduct.details) ? editingProduct.details.join("\n") : ""}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, details: e.target.value.split("\n").filter(Boolean) })}
-                        className="ipt"
-                        placeholder="e.g. Premium Quality Certified&#10;Available in bulk orders"
-                      />
-                      <span className="text-[10px] text-[var(--charcoal)]/50 mt-1 block">These will render with elegant gold checkmarks next to them in the storefront details list.</span>
-                    </div>
-                  </div>
-
-                  {/* Specifications boxes (Material, Size, Finish, Coverage) */}
-                  <div className="border-t border-subtle pt-4 space-y-4">
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-slate-brand mb-1">Specification Parameters</label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      {["Material", "Size", "Finish", "Coverage"].map((label) => {
-                        const spec = Array.isArray(editingProduct.specs) ? editingProduct.specs.find((s: any) => s.label === label) : null;
-                        const value = spec ? spec.value : "";
-                        return (
-                          <div key={label}>
-                            <label className="block text-[11px] uppercase tracking-wider font-medium text-[var(--charcoal)]/70 mb-1.5">{label}</label>
-                            <input
-                              type="text"
-                              value={value}
-                              onChange={(e) => {
-                                const newVal = e.target.value;
-                                let currentSpecs = Array.isArray(editingProduct.specs) ? [...editingProduct.specs] : [];
-                                const idx = currentSpecs.findIndex((s: any) => s.label === label);
-                                if (idx > -1) {
-                                  currentSpecs[idx] = { label, value: newVal };
-                                } else {
-                                  currentSpecs.push({ label, value: newVal });
-                                }
-                                setEditingProduct({ ...editingProduct, specs: currentSpecs });
-                              }}
-                              className="ipt"
-                              placeholder={`e.g. ${label === "Material" ? "Vitrified" : label === "Size" ? "600x600 mm" : ""}`}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Shipping & Return policy fields */}
-                  <div className="grid md:grid-cols-2 gap-4 border-t border-subtle pt-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Shipping Info Info</label>
-                      <textarea
-                        rows={2}
-                        value={editingProduct.shipping_info}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, shipping_info: e.target.value })}
-                        className="ipt"
-                        placeholder="Shipping text details..."
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-1.5">Return Policy policy</label>
-                      <textarea
-                        rows={2}
-                        value={editingProduct.return_policy}
-                        onChange={(e) => setEditingProduct({ ...editingProduct, return_policy: e.target.value })}
-                        className="ipt"
-                        placeholder="Return policies text details..."
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3 justify-end border-t border-subtle pt-4">
-                    <button type="button" onClick={() => setEditingProduct(null)} className="btn-outline-slate !py-2.5 !px-5 text-xs font-semibold">Cancel</button>
-                    <button type="submit" className="btn-gold !py-2.5 !px-6 text-xs font-bold">Save Product</button>
-                  </div>
-                  </form>
-                  </div>
-                </div>
-              )}
-
-              {/* Products listing grid view */}
-              <div className="bg-white border border-subtle rounded-xl overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead>
-                      <tr className="border-b border-subtle bg-slate-50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
-                        <th className="py-4 px-6 w-20">Image</th>
-                        <th className="py-4 px-6">Product Details</th>
-                        <th className="py-4 px-6">Category</th>
-                        <th className="py-4 px-6">Offer Price</th>
-                        <th className="py-4 px-6">Strike Price</th>
-                        <th className="py-4 px-6 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-subtle">
-                      {products.map((prod: any) => {
-                        const cat = categories.find(c => c.slug === prod.category_slug);
-                        return (
-                          <tr key={prod.id} className="hover:bg-slate-50/50">
-                            <td className="py-4 px-6">
-                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 border border-subtle">
-                                {prod.image ? (
-                                  <img 
-                                    src={prod.image} 
-                                    alt={prod.name} 
-                                    className="w-full h-full object-cover"
-                                    onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f1f5f9"/></svg>'; }}
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-slate-300"><ImageIcon size={16}/></div>
-                                )}
-                              </div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="font-semibold text-slate-brand text-sm">{prod.name}</div>
-                              <div className="text-[10px] font-mono text-[var(--charcoal)]/40 mt-0.5 uppercase">ID: {prod.id}</div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className="text-xs bg-slate-100 text-slate-700 py-1 px-3 rounded-full font-semibold border border-slate-200">
-                                {cat ? cat.name : prod.category_slug}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 font-bold text-[var(--gold)]">{inr(prod.price)}</td>
-                            <td className="py-4 px-6 line-through text-[var(--charcoal)]/40">{prod.old_price ? inr(prod.old_price) : "-"}</td>
-                            <td className="py-4 px-6 text-right">
-                              <div className="flex gap-2 justify-end">
-                                <button 
-                                  onClick={() => {
-                                    let galleryArr = [];
-                                    let detailsArr = [];
-                                    let specsArr = [];
-                                    try { galleryArr = JSON.parse(prod.gallery || "[]"); } catch { galleryArr = prod.gallery || []; }
-                                    try { detailsArr = JSON.parse(prod.details || "[]"); } catch { detailsArr = prod.details || []; }
-                                    try { specsArr = JSON.parse(prod.specs || "[]"); } catch { specsArr = prod.specs || []; }
-
-                                    setEditingProduct({ 
-                                      ...prod, 
-                                      gallery: galleryArr, 
-                                      details: detailsArr, 
-                                      specs: specsArr,
-                                      isEdit: true 
-                                    });
-                                  }}
-                                  className="w-8 h-8 rounded border border-subtle text-[var(--slate)] hover:border-[var(--gold)]/60 hover:text-[var(--gold)] flex items-center justify-center transition-colors bg-white"
-                                >
-                                  <Edit size={13} />
-                                </button>
-                                <button 
-                                  onClick={() => handleDeleteProduct(prod.id)}
-                                  className="w-8 h-8 rounded border border-subtle text-red-500 hover:bg-red-500/10 hover:border-red-500/30 flex items-center justify-center transition-colors bg-white"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================
-              TAB E: CUSTOMERS & PURCHASES LOG (CSV Download)
-              ========================================== */}
-          {activeTab === "customers" && (
-            <div className="space-y-6 text-left animate-fade-up">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">Customer Database</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50">View all client checkout logs and download a formatted spreadsheet list of all orders.</p>
-                </div>
-                {customers.length > 0 && (
-                  <button 
-                    onClick={downloadCustomerCSV}
-                    className="btn-gold !py-2.5 flex items-center gap-1.5 text-xs font-bold shadow-md shadow-[var(--gold)]/10"
-                  >
-                    <Download size={14} /> Download Customers CSV
-                  </button>
-                )}
-              </div>
-
-              {/* Customer data table */}
-              <div className="bg-white border border-subtle rounded-xl overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead>
-                      <tr className="border-b border-subtle bg-slate-50 text-[11px] uppercase tracking-widest text-[var(--charcoal)]/50 font-bold">
-                        <th className="py-4 px-6 w-16 text-center">ID</th>
-                        <th className="py-4 px-6">Customer Details</th>
-                        <th className="py-4 px-6">Address</th>
-                        <th className="py-4 px-6">Items Purchased</th>
-                        <th className="py-4 px-6">Total Order</th>
-                        <th className="py-4 px-6">Order Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-subtle">
-                      {customers.map((c: any) => {
-                        let itemsList: any[] = [];
-                        try {
-                          itemsList = JSON.parse(c.items || "[]");
-                        } catch {}
-                        
-                        return (
-                          <tr key={c.id} className="hover:bg-slate-50/50">
-                            <td className="py-4 px-6 font-mono text-xs text-[var(--charcoal)]/50 text-center">{c.id}</td>
-                            <td className="py-4 px-6">
-                              <div className="font-semibold text-slate-brand text-sm">{c.name}</div>
-                              <div className="text-xs font-mono text-[var(--charcoal)]/60 mt-0.5">{c.mobile}</div>
-                            </td>
-                            <td className="py-4 px-6 max-w-xs">
-                              <div className="text-xs text-[var(--slate)] leading-snug line-clamp-2">{c.address}</div>
-                            </td>
-                            <td className="py-4 px-6">
-                              <div className="space-y-1">
-                                {itemsList.map((itm: any, idx: number) => (
-                                  <div key={idx} className="text-xs flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)]" />
-                                    <span>{itm.name} <span className="text-[var(--charcoal)]/50 font-semibold">× {itm.qty}</span></span>
-                                  </div>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="py-4 px-6 font-bold text-slate-brand">{inr(c.total_price)}</td>
-                            <td className="py-4 px-6 text-xs text-[var(--charcoal)]/60">{new Date(c.created_at).toLocaleString()}</td>
-                          </tr>
-                        );
-                      })}
-                      {customers.length === 0 && (
-                        <tr>
-                          <td colSpan={6} className="py-12 text-center text-[var(--charcoal)]/50 text-sm">No customers registered yet. Placing mock checkout orders logs them here.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ==========================================
-              TAB F: WHATSAPP NUMBER CONFIGURATION
-              ========================================== */}
-          {activeTab === "whatsapp" && (
-            <div className="text-left animate-fade-up max-w-xl">
-              <div className="bg-white border border-subtle rounded-xl p-6 shadow-sm space-y-6">
-                <div>
-                  <h3 className="font-display font-semibold text-slate-brand text-lg">WhatsApp Redirect Configuration</h3>
-                  <p className="text-xs text-[var(--charcoal)]/50 mt-1">Configure the global phone number receiving customer redirect orders during checkout.</p>
-                </div>
-
-                <form onSubmit={handleSaveSettings} className="space-y-4">
-                  <div>
-                    <label className="block text-xs uppercase tracking-wider font-semibold text-[var(--charcoal)] mb-2">WhatsApp Redirect Number *</label>
-                    <div className="flex gap-2">
-                      <input 
-                        required
-                        type="text"
-                        value={settings.whatsapp_number}
-                        onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
-                        className="ipt font-semibold text-base"
-                        placeholder="e.g. 919330833711"
-                      />
-                    </div>
-                    <span className="text-[10px] text-[var(--charcoal)]/50 mt-1.5 block">
-                      Include country code (e.g. `91` for India) with absolutely NO spaces, pluses (`+`), or hyphens. (Standard: `919330833711`).
-                    </span>
-                  </div>
-
-                  <div className="bg-blue-500/5 border border-blue-500/10 rounded-lg p-4 flex items-start gap-2">
-                    <Settings size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                    <div className="text-xs text-[var(--slate)] leading-relaxed">
-                      <span className="font-semibold block text-slate-brand">Dynamic Global Redirection</span>
-                      Updating this value immediately changes the receiver number on all **"Order via WhatsApp"** floating cart elements and main checkout forms throughout the storefront.
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="btn-gold flex items-center justify-center gap-1.5 !py-3.5 !px-8 text-xs font-bold"
-                  >
-                    <Check size={14} /> Update Phone Settings
-                  </button>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-
+      {/* CSS keyframes injection */}
       <style>{`
-        .ipt {
-          width: 100%;
-          padding: 0.65rem 0.85rem;
-          border: 1px solid var(--subtle-border);
-          border-radius: 6px;
-          background: var(--offwhite);
-          font-family: var(--font-sans);
-          font-size: 0.85rem;
-          transition: border-color 0.2s;
-        }
-        .ipt:focus {
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        * { box-sizing: border-box; }
+        input:focus, select:focus, textarea:focus {
+          border-color: #d4a017 !important;
           outline: none;
-          border-color: var(--gold);
+          box-shadow: 0 0 0 3px rgba(212,160,23,0.12);
         }
+        button:disabled { opacity: 0.6; cursor: not-allowed !important; }
       `}</style>
     </div>
   );
