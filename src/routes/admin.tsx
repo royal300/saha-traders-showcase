@@ -1417,6 +1417,7 @@ function Sidebar({ activeTab, onTabChange, onLogout, isMobile, isOpen, onClose }
         </button>
       </div>
     </aside>
+    </>
   );
 }
 
