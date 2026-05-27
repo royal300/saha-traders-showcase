@@ -155,8 +155,8 @@ function ProductPage() {
             </div>
           </div>
           <div className="flex items-baseline gap-3 mt-5">
-            <span className="text-[var(--gold)] font-bold text-3xl">{inr(p.price)}</span>
-            {p.oldPrice && <span className="text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</span>}
+            <span className="text-[var(--gold)] font-bold text-3xl price-inr">{inr(p.price)}</span>
+            {p.oldPrice && <span className="text-[var(--charcoal)]/50 line-through price-inr">{inr(p.oldPrice)}</span>}
           </div>
 
           {cartItem ? (
@@ -253,8 +253,8 @@ function ProductPage() {
             </div>
             <div className="flex items-center gap-4 flex-1 sm:flex-none justify-between sm:justify-end w-full sm:w-auto">
               <div className="text-left sm:text-right shrink-0">
-                <div className="text-[var(--gold)] font-bold text-lg leading-tight">{inr(p.price)}</div>
-                {p.oldPrice && <div className="text-xs text-[var(--charcoal)]/50 line-through">{inr(p.oldPrice)}</div>}
+                <div className="text-[var(--gold)] font-bold text-lg leading-tight price-inr">{inr(p.price)}</div>
+                {p.oldPrice && <div className="text-xs text-[var(--charcoal)]/50 line-through price-inr">{inr(p.oldPrice)}</div>}
               </div>
               {cartItem ? (
                 <div className="flex items-center border border-slate-brand rounded-full overflow-hidden bg-slate-brand shrink-0 shadow-md">

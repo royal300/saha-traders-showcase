@@ -948,13 +948,13 @@ function ProductsTab({ products, categories, onReload }: { products: any[]; cate
     description: "",
     details: ["Premium Quality Certified", "Available in bulk orders"],
     specs: [
-      { label: "Material", value: "Ceramic" },
-      { label: "Size", value: "600 × 600 mm" },
-      { label: "Finish", value: "Glossy" },
-      { label: "Coverage", value: "4 tiles per box" },
+      { label: "Material", value: "" },
+      { label: "Size", value: "" },
+      { label: "Finish", value: "" },
+      { label: "Coverage", value: "" },
     ],
-    shipping_info: "Delivered across Barasat and nearby areas within 2–4 business days. Free shipping on orders above ₹5000.",
-    return_policy: "7-day hassle-free return on unused products in original packaging.",
+    shipping_info: "",
+    return_policy: "",
     isEdit: false,
   };
 
@@ -1360,7 +1360,7 @@ function Sidebar({ activeTab, onTabChange, onLogout, isMobile, isOpen, onClose }
       {/* Logo */}
       <div style={{ padding: "24px 20px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src={logoPng} alt="Saha" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "white", padding: 2 }} />
+          <img src={logoPng} alt="Saha" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain" }} />
           <div>
             <div style={{ fontSize: 13, fontWeight: 800, color: C.gold, letterSpacing: "0.04em" }}>SAHA MARBLE</div>
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Admin Panel</div>

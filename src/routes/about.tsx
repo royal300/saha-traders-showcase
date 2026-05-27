@@ -18,7 +18,7 @@ function AboutPage() {
   return (
     <>
       <section className="relative h-[400px]">
-        <SafeImage src={ai("luxury modern showroom interior displaying premium tiles and bathroom fittings, elegant architecture, wide shot, photorealistic, 1920x1080", 1920, 1080, seedFrom("about-hero"))} className="absolute inset-0 w-full h-full object-cover" alt=""/>
+        <img src="/about-poster.jpg" className="absolute inset-0 w-full h-full object-cover" alt="Saha Marble & Tiles Poster"/>
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative container-x h-full flex flex-col items-center justify-center text-center text-white">
           <h1 className="font-display text-5xl md:text-6xl text-white">About Saha Marble & Tiles</h1>

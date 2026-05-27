@@ -18,8 +18,7 @@ function CheckoutPage() {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(true);
   const [form, setForm] = React.useState({ name: "", mobile: "", address: "" });
-  const delivery = subtotal >= 5000 || subtotal === 0 ? 0 : 200;
-  const total = subtotal + delivery;
+  const total = subtotal;
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -82,13 +81,13 @@ function CheckoutPage() {
     <section className="container-x py-16 max-w-3xl">
       <h1 className="font-display text-4xl text-slate-brand text-center mb-10">Checkout</h1>
 
-      <div className="bg-white border border-subtle rounded-lg mb-8">
-        <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between p-5 text-left">
-          <span className="font-display text-lg text-slate-brand">Order Summary ({items.length} items)</span>
+      <div className="bg-white rounded-lg mb-6 shadow-sm">
+        <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between p-4 text-left border-b border-subtle">
+          <span className="font-display text-lg text-slate-brand">Order Summary ({items.length})</span>
           <ChevronDown size={18} className={`transition-transform ${open ? "rotate-180" : ""}`}/>
         </button>
         {open && (
-          <div className="px-5 pb-5 space-y-3 border-t border-subtle pt-4">
+          <div className="px-4 pb-4 space-y-3 pt-4">
             {items.map((i) => (
               <div key={i.slug} className="flex gap-3 items-center text-sm">
                 <img src={i.image} alt="" className="w-14 h-14 object-cover rounded"/>
@@ -104,18 +103,16 @@ function CheckoutPage() {
               </div>
             ))}
             <div className="border-t border-subtle pt-3 space-y-1 text-sm">
-              <Row l="Subtotal" v={inr(subtotal)}/>
-              <Row l="Delivery" v={delivery === 0 ? "Free" : inr(delivery)}/>
-              <div className="flex justify-between pt-2 border-t border-subtle text-base font-semibold text-slate-brand">
-                <span>Grand Total</span><span className="text-[var(--gold)]">{inr(total)}</span>
+              <div className="flex justify-between text-base font-semibold text-slate-brand">
+                <span>Grand Total</span><span className="text-[var(--gold)] price-inr">{inr(total)}</span>
               </div>
             </div>
           </div>
         )}
       </div>
 
-      <form onSubmit={submit} className="bg-white border border-subtle rounded-lg p-7 space-y-4">
-        <h2 className="font-display text-xl text-slate-brand mb-2">Delivery Details</h2>
+      <form onSubmit={submit} className="bg-white rounded-lg p-5 shadow-sm space-y-4">
+        <h2 className="font-display text-lg text-slate-brand mb-2 border-b border-subtle pb-2">Delivery Details</h2>
         <Field label="Full Name *"><input required value={form.name} onChange={set("name")} className="ipt" placeholder="Enter your full name"/></Field>
         <Field label="Mobile Number *"><input required value={form.mobile} onChange={set("mobile")} className="ipt" placeholder="Enter 10-digit mobile number"/></Field>
         <Field label="Delivery Address *"><textarea required rows={4} value={form.address} onChange={set("address")} className="ipt" placeholder="Enter short delivery address"/></Field>
