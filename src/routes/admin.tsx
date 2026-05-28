@@ -1278,7 +1278,7 @@ function SettingsTab({ settings, onReload }: { settings: Record<string, string>;
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await updateSettingFn({ key: "whatsapp_number", value: whatsapp });
+      const res = await updateSettingFn({ data: { key: "whatsapp_number", value: whatsapp } });
       if (res.success) {
         toast.success("WhatsApp number updated globally!");
         await onReload();

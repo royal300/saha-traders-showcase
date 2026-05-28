@@ -29,21 +29,22 @@ function CheckoutPage() {
 
     // Build structured WhatsApp message
     const itemsList = items.map((i, idx) => (
-      `${idx + 1}. *${i.name}* (Qty: ${i.qty})\n` +
+      `${idx + 1}. *${i.name}* (Qty: ${i.qty})
+` +
       `   Price: ${inr(i.price)} each | Total: ${inr(i.price * i.qty)}`
     )).join("\n\n");
 
-    const message = 
-      `🛍️ *New Order from Saha Marble & Tiles*\n` +
+    const message =
+      `\uD83D\uDECD\uFE0F *New Order from Saha Marble & Tiles*\n` +
       `----------------------------------------\n` +
-      `👤 *Name:* ${form.name}\n` +
-      `📞 *Mobile:* ${form.mobile}\n` +
-      `📍 *Address:* ${form.address}\n` +
+      `\uD83D\uDC64 *Name:* ${form.name}\n` +
+      `\uD83D\uDCDE *Mobile:* ${form.mobile}\n` +
+      `\uD83D\uDCCD *Address:* ${form.address}\n` +
       `----------------------------------------\n` +
-      `📋 *Items I want to purchase:* \n\n` +
+      `\uD83D\uDCCB *Items to Purchase:*\n\n` +
       `${itemsList}\n\n` +
       `----------------------------------------\n` +
-      `💰 *Grand Total:* ${inr(total)}`;
+      `\uD83D\uDCB0 *Grand Total:* ${inr(total)}`;
 
     const encodedMessage = encodeURIComponent(message);
     const phone = settings.whatsapp_number || "919330833711";

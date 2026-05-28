@@ -290,7 +290,8 @@ export const getSettingsFn = createServerFn({ method: "GET" })
   });
 
 export const updateSettingFn = createServerFn({ method: "POST" })
-  .handler(async ({ key, value }: { key: string; value: string }) => {
+  .handler(async ({ data }: { data: { key: string; value: string } }) => {
+    const { key, value } = data;
     try {
       await pool.query(
         "INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)",
