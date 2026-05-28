@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS products (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY (slug),
-  FOREIGN KEY (category_slug) REFERENCES categories(slug) ON DELETE CASCADE
+  FOREIGN KEY (category_slug) REFERENCES categories(slug) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 3. Hero Slider Media Table
