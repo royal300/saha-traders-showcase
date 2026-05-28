@@ -30,17 +30,11 @@ server {
         application/x-javascript application/json application/xml application/rss+xml
         image/svg+xml font/woff font/woff2 application/font-woff application/font-woff2;
 
-    # ── Uploaded media — 30-day cache with WebP support ────────────────────────
-    location /uploads/ {
+    # ── Uploaded media — 30-day cache (^~ takes priority over regex locations) ──
+    location ^~ /uploads/ {
         alias /var/www/saha_traders/public/uploads/;
         access_log off;
-        add_header Cache-Control "public, max-age=2592000, immutable";
-        add_header Vary "Accept";
-        types {
-            image/webp  webp;
-            image/jpeg  jpg jpeg;
-            image/png   png;
-        }
+        add_header Cache-Control "public, max-age=2592000";
         expires 30d;
     }
 
