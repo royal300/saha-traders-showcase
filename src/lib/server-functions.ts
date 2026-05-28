@@ -68,18 +68,21 @@ export const getBannersFn = createServerFn({ method: "GET" })
 
 export const saveBannerFn = createServerFn({ method: "POST" })
   .handler(async ({ data }: { data: any }) => {
-    const { id, image, heading, sub, label, slug, display_order } = data;
+    const { id, image, heading, sub, label, slug, display_order, show_overlay, show_button } = data;
+    // Default to 1 (true) if undefined
+    const overlay = show_overlay === undefined ? 1 : (show_overlay ? 1 : 0);
+    const btn = show_button === undefined ? 1 : (show_button ? 1 : 0);
     try {
       if (id) {
         await pool.query(
-          "UPDATE media SET image = ?, heading = ?, sub = ?, label = ?, slug = ?, display_order = ? WHERE id = ?",
-          [image, heading || null, sub || null, label || null, slug || null, display_order || 0, id]
+          "UPDATE media SET image = ?, heading = ?, sub = ?, label = ?, slug = ?, display_order = ?, show_overlay = ?, show_button = ? WHERE id = ?",
+          [image, heading || null, sub || null, label || null, slug || null, display_order || 0, overlay, btn, id]
         );
         return { success: true, id };
       } else {
         const [result]: any = await pool.query(
-          "INSERT INTO media (image, heading, sub, label, slug, display_order) VALUES (?, ?, ?, ?, ?, ?)",
-          [image, heading || null, sub || null, label || null, slug || null, display_order || 0]
+          "INSERT INTO media (image, heading, sub, label, slug, display_order, show_overlay, show_button) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+          [image, heading || null, sub || null, label || null, slug || null, display_order || 0, overlay, btn]
         );
         return { success: true, id: result.insertId };
       }

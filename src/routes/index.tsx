@@ -34,11 +34,15 @@ function Hero() {
         heading: s.heading || "",
         sub: s.sub || "",
         img: s.image,
+        show_overlay: s.show_overlay,
+        show_button: s.show_button,
         to: "/category/$slug" as const
       }));
     }
     return heroSlides.map((s) => ({
       ...s,
+      show_overlay: 1,
+      show_button: 1,
       to: "/category/$slug" as const,
     }));
   }, [bannersList]);
@@ -64,20 +68,22 @@ function Hero() {
             decoding={idx === 0 ? "sync" : "async"}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/45" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="container-x text-center text-white animate-fade-up">
+          {s.show_overlay !== 0 && <div className="absolute inset-0 bg-black/45" />}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="container-x text-center text-white animate-fade-up pointer-events-auto">
               {s.label && <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-xs md:text-sm mb-4">{s.label}</div>}
               {s.heading && <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>}
               {s.sub && <p className="mt-5 text-white/85 max-w-2xl mx-auto text-base md:text-lg">{s.sub}</p>}
-              {s.slug ? (
-                <Link to="/category/$slug" params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
-                  Explore Collection <ChevronRight size={16}/>
-                </Link>
-              ) : (
-                <Link to="/" className="btn-gold mt-8 inline-flex">
-                  Explore Collection <ChevronRight size={16}/>
-                </Link>
+              {s.show_button !== 0 && (
+                s.slug ? (
+                  <Link to="/category/$slug" params={{ slug: s.slug }} className="btn-gold mt-8 inline-flex">
+                    Explore Collection <ChevronRight size={16}/>
+                  </Link>
+                ) : (
+                  <Link to="/" className="btn-gold mt-8 inline-flex">
+                    Explore Collection <ChevronRight size={16}/>
+                  </Link>
+                )
               )}
             </div>
           </div>

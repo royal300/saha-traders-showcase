@@ -582,7 +582,7 @@ function MediaTab({ banners, onReload }: { banners: any[]; onReload: () => Promi
   const [deleteTarget, setDeleteTarget] = React.useState<any>(null);
   const [deleting, setDeleting] = React.useState(false);
 
-  const emptyForm = { image: "", heading: "", sub: "", label: "", slug: "", display_order: 1 };
+  const emptyForm = { image: "", heading: "", sub: "", label: "", slug: "", display_order: 1, show_overlay: 1, show_button: 1 };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -659,6 +659,24 @@ function MediaTab({ banners, onReload }: { banners: any[]; onReload: () => Promi
               <div>
                 <label style={labelStyle}>Display Order</label>
                 <input style={inputStyle} type="number" value={editing.display_order} onChange={(e) => setEditing({ ...editing, display_order: parseInt(e.target.value) || 1 })} min={1} />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: C.text }}>
+                  <input
+                    type="checkbox"
+                    checked={editing.show_overlay !== 0}
+                    onChange={(e) => setEditing({ ...editing, show_overlay: e.target.checked ? 1 : 0 })}
+                  />
+                  Show Dark Shade (Overlay)
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, cursor: "pointer", color: C.text }}>
+                  <input
+                    type="checkbox"
+                    checked={editing.show_button !== 0}
+                    onChange={(e) => setEditing({ ...editing, show_button: e.target.checked ? 1 : 0 })}
+                  />
+                  Show "Explore Collection" Button
+                </label>
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${C.border}` }}>
