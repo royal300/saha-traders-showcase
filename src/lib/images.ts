@@ -23,30 +23,30 @@ export function ai(
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?${q}`;
 }
 
-import mainHeroBanner from "../banner.png";
-import imgBathroomTiles from "../Image/category/bathroom-tiles.jpg";
-import imgComodes from "../Image/category/comod.jpg";
+import mainHeroBanner from "../banner.webp";
+import imgBathroomTiles from "../Image/category/bathroom-tiles.webp";
+import imgComodes from "../Image/category/comod.webp";
 import imgSinks from "../Image/category/sink.jpg";
 import imgTaps from "../Image/category/taps.jpg";
 
 import floor1 from "../Image/Products/floor/4-1230-230-spc-floor-tiles-for-floors-interlocking-flooring-original-imah4kygh6w2m3uz.webp";
 import floor2 from "../Image/Products/floor/bathroom-floor-tiles-3.webp";
 import floor3 from "../Image/Products/floor/images (12).jpg";
-import floor4 from "../Image/Products/floor/orient_bell_-_super_gloss_portoro_gold_marble_1.jpg";
+import floor4 from "../Image/Products/floor/orient_bell_-_super_gloss_portoro_gold_marble_1.webp";
 
-import wall1 from "../Image/Products/wall/50.jpg";
-import wall2 from "../Image/Products/wall/51.jpg";
+import wall1 from "../Image/Products/wall/50.webp";
+import wall2 from "../Image/Products/wall/51.webp";
 import wall3 from "../Image/Products/wall/52.jpg";
 import wall4 from "../Image/Products/wall/53.jpg";
 
-import kitchen1 from "../Image/Products/kitchen/1.jpg";
+import kitchen1 from "../Image/Products/kitchen/1.webp";
 import kitchen2 from "../Image/Products/kitchen/2.jpg";
 import kitchen3 from "../Image/Products/kitchen/3.webp";
-import kitchen4 from "../Image/Products/kitchen/4.jpg";
+import kitchen4 from "../Image/Products/kitchen/4.webp";
 
 import bathroomTile1 from "../Image/Products/bathroom/12x18-fish-page-0019-500x500.webp";
 import bathroomTile2 from "../Image/Products/bathroom/250x375-designer-bathroom-wall-tiles-2219405794-2w7kxklt.avif";
-import bathroomTile3 from "../Image/Products/bathroom/designer-bathroom-wall-tiles.jpg";
+import bathroomTile3 from "../Image/Products/bathroom/designer-bathroom-wall-tiles.webp";
 import bathroomTile4 from "../Image/Products/bathroom/onyx-blue-1_1_.webp";
 
 import basin1 from "../Image/Products/basin/37-50-9-8-wash-basin-20-x-14-x-6-inches-over-counter-basin-for-original-imahah5zdn5yaduf.webp";
@@ -59,7 +59,7 @@ import commode2 from "../Image/Products/comod/61TsgFj3OkL.jpg";
 import commode3 from "../Image/Products/comod/68-51-4-aps-745-plantex-75-original-imahm8r2ppctze8d.webp";
 import commode4 from "../Image/Products/comod/images (11).jpg";
 
-import tap1 from "../Image/Products/tap/61gUuFAlXmL._SL1000.jpg";
+import tap1 from "../Image/Products/tap/61gUuFAlXmL._SL1000.webp";
 import tap2 from "../Image/Products/tap/images (10).jpg";
 import tap3 from "../Image/Products/tap/images (9).jpg";
 import tap4 from "../Image/Products/tap/wall-mount-installation-type-for-sink-wash-basin-taps-2-in-1-enriched-0-original-imahcgmuvzqb6gws.webp";
@@ -72,35 +72,35 @@ import sink4 from "../Image/Products/sink/images (8).jpg";
 export const categoryVisuals: Record<string, { thumb: string; banner: string }> = {
   "floor-tiles": {
     thumb: ai("premium vitrified floor tiles samples, marble granite wood pattern slabs, studio product display, 800x800", 800, 800, seedFrom("cat-thumb-floor-tiles")),
-    banner: ai("modern elegant living room interior with polished glossy white marble floor tiles installed, spacious luxury home, wide banner format, photorealistic, 1600x600", 1600, 600, seedFrom("cat-banner-floor-tiles")),
+    banner: ai("modern elegant living room interior with polished glossy white marble floor tiles installed, spacious luxury home, wide banner format, photorealistic", 1280, 500, seedFrom("cat-banner-floor-tiles")),
   },
   "wall-tiles": {
     thumb: ai("decorative wall tiles mosaic subway ceramic textured samples, studio product packshot, 800x800", 800, 800, seedFrom("cat-thumb-wall-tiles")),
-    banner: ai("modern luxurious bathroom interior with stylish designer ceramic wall tiles, high-end design, photorealistic, 1600x600", 1600, 600, seedFrom("cat-banner-wall-tiles")),
+    banner: ai("modern luxurious bathroom interior with stylish designer ceramic wall tiles, high-end design, photorealistic", 1280, 500, seedFrom("cat-banner-wall-tiles")),
   },
   "kitchen-tiles": {
     thumb: ai("modern kitchen backsplash tiles, glossy mosaic hexagon subway patterns, studio packshot, 800x800", 800, 800, seedFrom("cat-thumb-kitchen-tiles")),
-    banner: ai("spacious luxury kitchen with beautiful ceramic tiled backsplash, marble countertops, bright modern interior, 1600x600", 1600, 600, seedFrom("cat-banner-kitchen-tiles")),
+    banner: ai("spacious luxury kitchen with beautiful ceramic tiled backsplash, marble countertops, bright modern interior", 1280, 500, seedFrom("cat-banner-kitchen-tiles")),
   },
   "bathroom-tiles": {
     thumb: imgBathroomTiles,
-    banner: ai("luxury spa bathroom interior with elegant ceramic floor and wall tiles installed, high-end fixtures, 1600x600", 1600, 600, seedFrom("cat-banner-bathroom-tiles")),
+    banner: ai("luxury spa bathroom interior with elegant ceramic floor and wall tiles installed, high-end fixtures", 1280, 500, seedFrom("cat-banner-bathroom-tiles")),
   },
   basins: {
     thumb: ai("collection of modern white ceramic bathroom wash basins, pedestal and counter washbasins, product display, 800x800", 800, 800, seedFrom("cat-thumb-basins")),
-    banner: ai("luxury bathroom vanity counter with premium white ceramic wash basin, elegant faucet tap, mirror, warm lighting, 1600x600", 1600, 600, seedFrom("cat-banner-basins")),
+    banner: ai("luxury bathroom vanity counter with premium white ceramic wash basin, elegant faucet tap, mirror, warm lighting", 1280, 500, seedFrom("cat-banner-basins")),
   },
   commodes: {
     thumb: imgComodes,
-    banner: ai("clean contemporary bathroom interior with a premium white ceramic toilet commode installed, minimalist design, 1600x600", 1600, 600, seedFrom("cat-banner-commodes")),
+    banner: ai("clean contemporary bathroom interior with a premium white ceramic toilet commode installed, minimalist design", 1280, 500, seedFrom("cat-banner-commodes")),
   },
   taps: {
     thumb: imgTaps,
-    banner: ai("modern luxury bathroom sink vanity with an elegant polished chrome tap faucet close-up, water drop, photorealistic, 1600x600", 1600, 600, seedFrom("cat-banner-taps")),
+    banner: ai("modern luxury bathroom sink vanity with an elegant polished chrome tap faucet close-up, water drop, photorealistic", 1280, 500, seedFrom("cat-banner-taps")),
   },
   sinks: {
     thumb: imgSinks,
-    banner: ai("beautiful modern kitchen design with stainless steel sink, designer faucet tap, clean marble countertop, 1600x600", 1600, 600, seedFrom("cat-banner-sinks")),
+    banner: ai("beautiful modern kitchen design with stainless steel sink, designer faucet tap, clean marble countertop", 1280, 500, seedFrom("cat-banner-sinks")),
   },
 };
 
@@ -359,15 +359,15 @@ export const heroSlides = [
     label: "Basins & Sinks",
     heading: "Where Function Meets Beauty",
     sub: "Designer basins and sinks that transform your bathroom and kitchen",
-    img: ai("designer luxury bathroom wash basin and modern kitchen sink display, premium fixtures showroom, wide banner, warm lighting, 1920x1080", 1920, 1080, seedFrom("hero-basins-sinks")),
+    img: ai("designer luxury bathroom wash basin and modern kitchen sink display, premium fixtures showroom, wide banner, warm lighting", 1280, 600, seedFrom("hero-basins-sinks")),
   },
   {
     slug: "commodes",
     label: "Commodes & Taps",
     heading: "Redefine Your Bathroom Luxury",
     sub: "Sleek commodes and premium taps built for modern living",
-    img: ai("minimalist contemporary bathroom toilet commode and polished chrome bathroom tap faucet close-up, luxury interior wide banner, photorealistic, 1920x1080", 1920, 1080, seedFrom("hero-commodes-taps")),
+    img: ai("minimalist contemporary bathroom toilet commode and polished chrome bathroom tap faucet close-up, luxury interior wide banner, photorealistic", 1280, 600, seedFrom("hero-commodes-taps")),
   },
 ] as const;
 
-export const showroomBanner = ai("beautiful modern tile and bathroom fittings showroom interior display shelves products warm lighting photorealistic wide, 1920x1080", 1920, 1080, seedFrom("showroom-banner"));
+export const showroomBanner = ai("beautiful modern tile and bathroom fittings showroom interior display shelves products warm lighting photorealistic wide", 1280, 600, seedFrom("showroom-banner"));

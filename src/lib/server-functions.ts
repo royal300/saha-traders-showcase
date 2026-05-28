@@ -305,7 +305,7 @@ export const updateSettingFn = createServerFn({ method: "POST" })
   });
 
 // ==========================================
-// 8. Image File Uploader
+// 8. Image File Uploader (with WebP optimization)
 // ==========================================
 export const uploadImageFn = createServerFn({ method: "POST" })
   .handler(async ({ data }: { data: { fileName: string; base64Data: string } }) => {
@@ -316,25 +316,33 @@ export const uploadImageFn = createServerFn({ method: "POST" })
 
       const buffer = Buffer.from(base64Data, "base64");
 
-      // Clean the filename of special characters
-      const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_");
-      const uniqueName = `${Date.now()}_${cleanName}`;
+      // Always save as .webp regardless of upload format
+      const cleanName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_").replace(/\.(jpe?g|png|gif|bmp|tiff?)$/i, "");
+      const uniqueName = `${Date.now()}_${cleanName}.webp`;
 
       const publicDir = path.join(process.cwd(), "public");
       const uploadsDir = path.join(publicDir, "uploads");
 
-      // Ensure that public and public/uploads directories exist on disk
-      if (!fs.existsSync(publicDir)) {
-        fs.mkdirSync(publicDir);
-      }
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir);
-      }
+      if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
       const filePath = path.join(uploadsDir, uniqueName);
-      fs.writeFileSync(filePath, buffer);
 
-      // Return the public relative path served dynamically by Vite/Vinxi
+      // Try sharp for compression (available on VPS), fallback to raw write
+      try {
+        const sharp = await import("sharp");
+        await sharp.default(buffer)
+          .resize({ width: 1280, withoutEnlargement: true })
+          .webp({ quality: 82, effort: 4 })
+          .toFile(filePath);
+      } catch {
+        // sharp not available in this environment — save original
+        const rawName = `${Date.now()}_${fileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+        const rawPath = path.join(uploadsDir, rawName);
+        fs.writeFileSync(rawPath, buffer);
+        return { success: true, url: `/uploads/${rawName}` };
+      }
+
       return { success: true, url: `/uploads/${uniqueName}` };
     } catch (e: any) {
       console.error("Error uploading image:", e);

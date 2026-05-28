@@ -45,7 +45,7 @@ function Hero() {
 
   const [i, setI] = React.useState(0);
   React.useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % activeSlides.length), 4500);
+    const t = setInterval(() => setI((v) => (v + 1) % activeSlides.length), 5000);
     return () => clearInterval(t);
   }, [activeSlides]);
 
@@ -56,7 +56,14 @@ function Hero() {
           key={idx}
           className={`absolute inset-0 transition-opacity duration-1000 ${i === idx ? "opacity-100" : "opacity-0"}`}
         >
-          <SafeImage src={s.img} alt={s.heading} loading={idx === 0 ? "eager" : "lazy"} decoding="async" className="w-full h-full object-cover" />
+          <SafeImage
+            src={s.img}
+            alt={s.heading}
+            eager={idx === 0}
+            loading={idx === 0 ? "eager" : "lazy"}
+            decoding={idx === 0 ? "sync" : "async"}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute inset-0 bg-black/45" />
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="container-x text-center text-white animate-fade-up">
