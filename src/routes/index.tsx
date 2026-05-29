@@ -71,16 +71,16 @@ function Hero() {
           {s.show_overlay !== 0 && <div className="absolute inset-0 bg-black/45" />}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="container-x text-center text-white animate-fade-up pointer-events-auto">
-              {s.label && <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-[9px] md:text-sm mb-1 md:mb-4">{s.label}</div>}
-              {s.heading && <h1 className="font-display text-xl sm:text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>}
-              {s.sub && <p className="mt-2 md:mt-5 text-white/85 max-w-2xl mx-auto text-xs md:text-lg hidden sm:block">{s.sub}</p>}
+              {s.label && <div className="text-[var(--gold)] uppercase tracking-[0.3em] text-[10px] md:text-sm mb-2 md:mb-4">{s.label}</div>}
+              {s.heading && <h1 className="font-display text-2xl sm:text-4xl md:text-6xl lg:text-7xl text-white max-w-4xl mx-auto leading-tight">{s.heading}</h1>}
+              {s.sub && <p className="mt-2 md:mt-5 text-white/85 max-w-2xl mx-auto text-sm md:text-lg hidden sm:block">{s.sub}</p>}
               {s.show_button !== 0 && (
                 s.slug ? (
-                  <Link to="/category/$slug" params={{ slug: s.slug }} className="btn-gold mt-3 md:mt-8 inline-flex text-[11px] md:text-sm px-4 py-2 md:px-7 md:py-3">
+                  <Link to="/category/$slug" params={{ slug: s.slug }} className="btn-gold mt-4 md:mt-8 inline-flex text-xs md:text-sm px-5 py-2.5 md:px-7 md:py-3">
                     Explore Collection <ChevronRight size={14}/>
                   </Link>
                 ) : (
-                  <Link to="/" className="btn-gold mt-3 md:mt-8 inline-flex text-[11px] md:text-sm px-4 py-2 md:px-7 md:py-3">
+                  <Link to="/" className="btn-gold mt-4 md:mt-8 inline-flex text-xs md:text-sm px-5 py-2.5 md:px-7 md:py-3">
                     Explore Collection <ChevronRight size={14}/>
                   </Link>
                 )
