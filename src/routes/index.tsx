@@ -54,7 +54,7 @@ function Hero() {
   }, [activeSlides]);
 
   return (
-    <section className="relative h-[50vh] min-h-[400px] w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden" style={{ aspectRatio: '16/7', minHeight: '220px', maxHeight: '600px' }}>
       {activeSlides.map((s, idx) => (
         <div
           key={idx}
@@ -66,7 +66,7 @@ function Hero() {
             eager={idx === 0}
             loading={idx === 0 ? "eager" : "lazy"}
             decoding={idx === 0 ? "sync" : "async"}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain md:object-cover bg-black"
           />
           {s.show_overlay !== 0 && <div className="absolute inset-0 bg-black/45" />}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
