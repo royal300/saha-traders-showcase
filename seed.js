@@ -1,8 +1,8 @@
 import mysql from "mysql2/promise";
 
 const host = "127.0.0.1";
-const user = "myadmin";
-const password = ",mypass";
+const user = "root";
+const password = "mypass";
 const database = "saha_marble_tiles";
 
 const categoryMeta = [

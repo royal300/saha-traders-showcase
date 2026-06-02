@@ -13,7 +13,7 @@ conn.on('ready', () => {
   // Connect to mysql and pipe the SQL content
   console.log('Executing database schema creation on VPS...');
   
-  conn.exec(`mysql -u myadmin -p',mypass' -D saha_marble_tiles`, (err, stream) => {
+  conn.exec(`mysql -u root -p'mypass' -D saha_marble_tiles`, (err, stream) => {
     if (err) {
       console.error('Execution error:', err);
       conn.end();

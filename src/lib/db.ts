@@ -1,8 +1,8 @@
 import mysql from "mysql2/promise";
 
 const host = "93.127.206.52";
-const user = "myadmin";
-const password = ",mypass";
+const user = "root";
+const password = "mypass";
 const database = "saha_marble_tiles";
 
 // Initialize high-performance persistent connection pool

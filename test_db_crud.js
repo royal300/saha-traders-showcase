@@ -17,7 +17,7 @@ const conn = new Client();
 conn.on('ready', () => {
   console.log('--- Connected to VPS over SSH ---');
   
-  conn.exec("mysql -u myadmin -p',mypass' -D saha_marble_tiles", (err, stream) => {
+  conn.exec("mysql -u root -p'mypass' -D saha_marble_tiles", (err, stream) => {
     if (err) {
       console.error('Execution error:', err);
       conn.end();
