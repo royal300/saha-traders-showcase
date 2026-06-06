@@ -152,15 +152,19 @@ export async function hydrateCatalog(force = false) {
   try {
     const dbCats = await getCategoriesFn();
     if (dbCats) {
-      const parsedCats = dbCats.map((c: any) => ({
-        id: c.id,
-        slug: c.slug,
-        name: c.name,
-        image: c.image,
-        banner: c.banner || c.image,
-        blurb: c.blurb || "",
-        is_featured: c.is_featured === 1 || c.is_featured === true || c.is_featured === "1" ? 1 : 0
-      }));
+      const parsedCats = dbCats.map((c: any) => {
+        const img = c.image?.startsWith("/uploads/") ? `https://traders.royal300.com${c.image}` : c.image;
+        const bnr = c.banner?.startsWith("/uploads/") ? `https://traders.royal300.com${c.banner}` : (c.banner || c.image);
+        return {
+          id: c.id,
+          slug: c.slug,
+          name: c.name,
+          image: img,
+          banner: bnr,
+          blurb: c.blurb || "",
+          is_featured: c.is_featured === 1 || c.is_featured === true || c.is_featured === "1" ? 1 : 0
+        };
+      });
       categories.splice(0, categories.length, ...parsedCats);
     }
 
@@ -172,6 +176,9 @@ export async function hydrateCatalog(force = false) {
         try { galleryArr = JSON.parse(p.gallery || "[]"); } catch { galleryArr = p.gallery || []; }
         try { specsArr = JSON.parse(p.specs || "[]"); } catch { specsArr = p.specs || []; }
 
+        const img = p.image?.startsWith("/uploads/") ? `https://traders.royal300.com${p.image}` : p.image;
+        const galleryUrls = galleryArr.map((g: string) => g?.startsWith("/uploads/") ? `https://traders.royal300.com${g}` : g);
+
         return {
           id: p.id,
           slug: p.slug,
@@ -181,8 +188,8 @@ export async function hydrateCatalog(force = false) {
           oldPrice: p.old_price ? parseFloat(p.old_price) : undefined,
           rating: parseFloat(p.rating) || 5,
           reviews: parseInt(p.reviews) || 0,
-          image: p.image,
-          gallery: galleryArr,
+          image: img,
+          gallery: galleryUrls,
           description: p.description || "",
           specs: specsArr
         };
@@ -197,7 +204,11 @@ export async function hydrateCatalog(force = false) {
 
     const dbBanners = await getBannersFn();
     if (dbBanners) {
-      dynamicBanners.splice(0, dynamicBanners.length, ...dbBanners);
+      const parsedBanners = dbBanners.map((b: any) => ({
+        ...b,
+        image: b.image?.startsWith("/uploads/") ? `https://traders.royal300.com${b.image}` : b.image
+      }));
+      dynamicBanners.splice(0, dynamicBanners.length, ...parsedBanners);
     }
 
   } catch (err) {
